@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block main_panel %}
-    <a class="go-back" title="{% trans "Back to Library" %}" href="{% url 'repo' repo.id %}"><span class="icon-chevron-left"></span></a>
+    <a class="go-back" title="{% trans "Back to Library" %}" href="{% url 'lib' repo.id '' %}"><span class="icon-chevron-left"></span></a>
     <div class="w100 ovhd">
         <h2 class="fleft">{{repo.props.name}} {% trans "'s trash" %}</h2>
         {% if enable_clean %}

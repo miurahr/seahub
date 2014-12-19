@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block left_panel %}
-<a class="go-back" title="{% trans "Back to Library" %}" href="{% url 'repo' repo.id %}"><span class="icon-chevron-left"></span></a>
+<a class="go-back" title="{% trans "Back to Library" %}" href="{% url 'lib' repo.id '' %}"><span class="icon-chevron-left"></span></a>
 <div class="side-textnav">
     <ul class="side-textnav-tabs">
         <li class="tab tab-cur"><a href="#basic-info">{% trans "Basic Info" %}</a></li>
