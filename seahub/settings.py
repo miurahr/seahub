@@ -177,6 +177,7 @@ INSTALLED_APPS = (
 
     'registration',
     'captcha',
+    'compressor',
 
     'seahub.api2',
     'seahub.avatar',
@@ -405,6 +406,16 @@ LOGIN_REMEMBER_DAYS = 7
 SHARE_ACCESS_PASSWD_TIMEOUT = 60 * 60
 
 SEAFILE_VERSION = '3.0.0'
+
+# Compress static files(css, js)
+COMPRESS_ENABLED = True
+COMPRESS_PRECOMPILERS = (
+    ('text/less', 'lessc {infile} {outfile}'),
+)
+COMPRESS_URL = '/media/'
+COMPRESS_ROOT = os.path.join(PROJECT_ROOT, '../media')
+COMPRESS_DEBUG_TOGGLE = 'nocompress'
+# COMPRESS_CSS_HASHING_METHOD = 'content'
 
 #################
 # Email sending #

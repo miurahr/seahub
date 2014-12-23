@@ -1,5 +1,6 @@
 {% load seahub_tags avatar_tags group_avatar_tags i18n %}
 {% load url from future %}
+{% load compress %}
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -131,8 +132,11 @@
         {% include 'footer.html' %}
 </div><!-- wrapper -->
 
+{% compress js %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jq.min.js?t=1398068110"></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}js/base.js?t=1404370380"></script>
+{% endcompress %}
+
 <script type="text/javascript">
 $.jstree._themes = '{{ MEDIA_URL }}js/themes/';
 function ajaxErrorHandler(xhr, textStatus, errorThrown) {
