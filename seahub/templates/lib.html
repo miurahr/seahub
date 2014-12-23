@@ -286,11 +286,21 @@
             <td class="star alc">
                 <% if (dirent.starred) { %>
                     <span title="{% trans "starred" %}" class="icon-star file-star"></span>
-                    <% } else { %>
+                <% } else { %>
                     <span title="{% trans "unstarred" %}" class="icon-star-empty file-star"></span>
-                    <% } %>
+                <% } %>
             </td>
-            <td class="dirent-icon"><img src="{{ MEDIA_URL }}img/file/<%= dirent.file_icon %>" alt="{% trans "File" %}" /></td>
+            <td class="dirent-icon">
+                <% if (dirent.is_img) { %>
+                    <% if (dirent.thumbnail_src) { %>
+                        <img class="thumbnail" src="<%= dirent.thumbnail_src %>" alt="" />
+                    <% } else { %>
+                        <img class="not-thumbnail" src="{{ MEDIA_URL }}img/file/<%= dirent.file_icon %>" alt="" />
+                    <% } %>
+                <% } else { %>
+                    <img src="{{ MEDIA_URL }}img/file/<%= dirent.file_icon %>" alt="" />
+                <% } %>
+            </td>
             <td>
                 <span class="dirent-name"><a class="normal" href="{{SITE_ROOT}}lib/{{repo.id}}/file<% print(path + dirent.obj_name); %>" target="_blank"><%= dirent.obj_name %></a></span>
             </td>
@@ -1067,7 +1077,11 @@ var LibView = Backbone.View.extend({
             return false;
         }
         // show 'loading'
-        this.$('.path').append('<img src="{{MEDIA_URL}}img/loading-icon.gif" alt="" class="vam" />');
+        var path = this.$('.path');
+        // check if loading_icon is already there, in case some users may repeatly click the link
+        if (path.find('img').length == 0) {
+            path.append('<img src="{{MEDIA_URL}}img/loading-icon.gif" alt="" class="vam" />');
+        }
         // empty all models
         dirents.reset();
         // update url & dirents

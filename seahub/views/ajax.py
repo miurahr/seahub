@@ -475,6 +475,15 @@ def get_lib_dirents(request, repo_id):
         d_['uploadtoken'] = d.uploadtoken
         dirent_list.append(d_)
 
+    if not repo.encrypted and ENABLE_THUMBNAIL:
+        size = THUMBNAIL_DEFAULT_SIZE
+        for f in file_list:
+            file_type, file_ext = get_file_type_and_ext(f.obj_name)
+            if file_type == IMAGE:
+                f.is_img = True
+                if os.path.exists(os.path.join(THUMBNAIL_ROOT, size, f.obj_id)):
+                    f.thumbnail_src = get_thumbnail_src(repo.id, f.obj_id, size)
+
     for f in file_list:
         f_ = {}
         f_['is_file'] = True
@@ -487,6 +496,10 @@ def get_lib_dirents(request, repo_id):
         f_['obj_id'] = f.obj_id
         f_['sharelink'] = f.sharelink
         f_['sharetoken'] = f.sharetoken
+        if f.is_img:
+            f_['is_img'] = f.is_img
+        if f.thumbnail_src:
+            f_['thumbnail_src'] = f.thumbnail_src
         dirent_list.append(f_)
 
     result["dirent_list"] = dirent_list
