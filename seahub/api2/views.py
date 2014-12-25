@@ -896,8 +896,9 @@ def get_dir_entrys_by_id(request, repo, path, dir_id):
         return api_error(HTTP_520_OPERATION_FAILED,
                          "Failed to list dir.")
 
-    mtimes = DirFilesLastModifiedInfo.objects.get_dir_files_last_modified(
-        repo.id, path, dir_id)
+    # mtimes = DirFilesLastModifiedInfo.objects.get_dir_files_last_modified(
+    #     repo.id, path, dir_id)
+    mtimes = {}                 # Temprarily disable mtime for file
 
     dir_list, file_list = [], []
     for dirent in dirs:
@@ -909,7 +910,8 @@ def get_dir_entrys_by_id(request, repo, path, dir_id):
             try:
                 entry["size"] = get_file_size(repo.store_id, repo.version,
                                               dirent.obj_id)
-            except Exception, e:
+            except Exception as e:
+                logger.error(e)
                 entry["size"] = 0
 
         entry["type"] = dtype
