@@ -1045,9 +1045,46 @@ var LibView = Backbone.View.extend({
     addOne: function (dirent) {
         var view = new DirentView({model: dirent});
         this.dirent_list.append(view.render().el);
-        if (dirent === _.last(dirents.models) &&
-            !dirents.dirent_more) {
-            $('.loading-tip').hide();
+        if (dirent === _.last(dirents.models)) {
+            if (!dirents.dirent_more) {
+                $('.loading-tip').hide();
+            }
+            var images = dirents.where({'is_img':true});
+            var images_no_thumbnail = [];
+            $(images).each(function (index, img) {
+                if (!img.get('thumbnail_src')) {
+                    images_no_thumbnail.push(img);
+                }
+            });
+            if (images_no_thumbnail.length == 0) {
+                return;
+            }
+            var parent_dir = dirents.path;
+            var get_thumbnail = function (i) {
+                var img_no_thumbnail = images_no_thumbnail[i];
+                var file_name = img_no_thumbnail.get('obj_name');
+                var path = parent_dir;
+                if (path != '/') {
+                    path = path + '/';
+                }
+                $.ajax({
+                    url: '{% url 'thumbnail_create' repo.id %}?path=' + e(path + file_name),
+                    cache: false,
+                    dataType: 'json',
+                    success: function(data) {
+                        img_no_thumbnail.set({
+                            'thumbnail_src': data.thumbnail_src
+                        });
+                    },
+                    complete: function() {
+                        // current path may be changed. e.g., the user enter another directory
+                        if (i < images_no_thumbnail.length - 1 && parent_dir == dirents.path) {
+                            get_thumbnail(++i);
+                        }
+                    }
+                });
+            };
+            get_thumbnail(0);
         }
     },
     reset: function () {

@@ -410,6 +410,8 @@ def lib(request, repo_id, path):
             'ENABLE_SUB_LIBRARY': ENABLE_SUB_LIBRARY,
             'enable_upload_folder': ENABLE_UPLOAD_FOLDER,
             #'server_crypto': server_crypto,
+            'ENABLE_THUMBNAIL': ENABLE_THUMBNAIL,
+            'PREVIEW_DEFAULT_SIZE': PREVIEW_DEFAULT_SIZE,
             }, context_instance=RequestContext(request))
     
 @login_required
