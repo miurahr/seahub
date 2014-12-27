@@ -1012,7 +1012,6 @@ var LibView = Backbone.View.extend({
 
         this.listenTo(dirents, 'add', this.addOne);
         this.listenTo(dirents, 'reset', this.reset);
-        this.listenTo(dirents, 'sort', this.sort);
     },
     renderPath: function () {
         var path = dirents.path,
@@ -1089,10 +1088,6 @@ var LibView = Backbone.View.extend({
     },
     reset: function () {
         $('tr:gt(0)', this.dirent_list).remove();
-    },
-    sort: function () {
-        $('tr:gt(0)', this.dirent_list).remove();
-        dirents.each(this.addOne, this);
     },
     events: {
         'click .path-link':'visitDir',
@@ -1259,6 +1254,8 @@ var LibView = Backbone.View.extend({
             }
         };
         dirents.sort();
+        $('tr:gt(0)', this.dirent_list).remove();
+        dirents.each(this.addOne, this);
         el.toggleClass('icon-caret-up icon-caret-down');
     },
     sortByTime: function () {
@@ -1274,6 +1271,8 @@ var LibView = Backbone.View.extend({
             }
         };
         dirents.sort();
+        $('tr:gt(0)', this.dirent_list).remove();
+        dirents.each(this.addOne, this);
         el.toggleClass('icon-caret-up icon-caret-down');
     },
     delete: function () {
