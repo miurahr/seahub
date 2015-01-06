@@ -143,7 +143,12 @@ var app = {
     },
     templates: {},
     pages: {},
-    utils: {}
+    utils: {},
+    {% with repo_id='b1f848b7-96a2-418d-8182-91ab4c4835eb' %}
+    urls: {
+        get_lib_dirents: '{% url 'get_lib_dirents' repo_id %}'
+    }
+    {% endwith %}
 };
 </script>
 {% block app_page_script %}{% endblock %}
