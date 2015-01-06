@@ -911,7 +911,12 @@ app.pages.lib = {
             cancel_cp: '{% url "cancel_cp" %}'
         },
         msgs: {
-            successDel: "{% trans "Successfully deleted %(name)s" %}"
+            successDel: "{% trans "Successfully deleted %(name)s" %}",
+            renameDir: "{% trans "Rename Directory" %}",
+            renameFile: "{% trans "Rename File" %}",
+            required: "{% trans "It is required." %}",
+            notRenamed: "{% trans "You have not renamed it." %}",
+            justNow: "{% trans "Just now" %}"
         }
     }
 };

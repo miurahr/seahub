@@ -1,7 +1,7 @@
 (function(window, app, Backbone, jQuery, _){ 
     "use strict";
 
-    app.LibRouter = Backbone.Router.extend({
+    app.Router = Backbone.Router.extend({
         initialize: function () {
             this.libdirents = new app.collections.LibDirents(); 
             this.libview = new app.views.LibView({collection: this.libdirents});
@@ -35,7 +35,7 @@
         }
     });
 
-    app.router = new app.LibRouter();
+    app.router = new app.Router();
 
     Backbone.history.start({
         pushState: true,
