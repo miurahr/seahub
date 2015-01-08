@@ -19,7 +19,9 @@
             this.libdirents = new app.collections.LibDirents();
             this.libview = new app.views.LibView({collection: this.libdirents});
 
+            if (app.pages.lib) { // todo: better coding
             app.pages.lib.dirents = this.libdirents;
+            }
 
             if (!path) {
                 path = '/';
@@ -30,7 +32,10 @@
             var libview = this.libview; 
             libdirents.path = path;
 
+            if (app.pages.lib) {
             libview.renderPath();
+            }
+
             var loading_tip = $('#repo-file-list .loading-tip');
             loading_tip.show();
 
@@ -38,8 +43,11 @@
             libdirents.fetch({
                 data: {'p': path},
                 success: function (collection, response, opts) {
+                    libview.renderPath(); // for 'myhome' lib
                     libview.renderLibop();
-                    last_start = 0; // for 'more'
+
+                    // todo
+                    // last_start = 0; // for 'more'
                     if (response.dirent_list.length == 0) { // the dir is empty
                         loading_tip.hide();
                     }

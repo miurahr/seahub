@@ -5,17 +5,26 @@
 
     app.views.DirentView = Backbone.View.extend({
         tagName: 'tr',
-        template: _.template($('#dirent-template').html()),
+        template: _.template($('#dirent-template').html() || ''),
         initialize: function() {
             this.listenTo(this.model, "change", this.render);
             this.listenTo(this.model, 'remove', this.remove); // for multi-dirents mv
         },
         render: function () {
-            var path = this.collection.path;
+            var dirents = this.collection;
+            var path = dirents.path;
             if (path != '/') {
                 path += '/';
             }
-            this.$el.html(this.template({dirent: this.model.attributes, path: path}));
+            this.$el.html(this.template({
+                dirent: this.model.attributes,
+                path: path,
+                repo_id: dirents.repo_id,
+                user_perm: dirents.user_perm,
+                repo_encrypted: dirents.encrypted,
+                media_url: app.config.mediaUrl,
+                site_root: app.config.siteRoot
+            }));
             $('.checkbox-orig', this.$el).unbind();
             return this;
         },
@@ -338,8 +347,8 @@
 
     app.views.LibView = Backbone.View.extend({
         el: $('#repo-file-list'),
-        path_template: _.template($('#path-template').html()),
-        libop_template: _.template($('#libop-template').html()),
+        path_template: _.template($('#path-template').html() || ''),
+        libop_template: _.template($('#libop-template').html() || ''),
         initialize: function () {
             this.dirent_list = this.$('.repo-file-list');
             $('th .checkbox-orig').unbind();
@@ -349,17 +358,35 @@
             this.listenTo(dirents, 'reset', this.reset);
         },
         renderPath: function () {
-            var path = this.collection.path,
+            var dirents = this.collection;
+            var path = dirents.path,
                 path_list = [];
             if (path != '/') {
                 path_list = path.substr(1).split('/');
             }
             $('.repo-file-list-topbar .path').html(this.path_template({
-                path_list: path_list
+                path_list: path_list,
+                repo_id: dirents.repo_id,
+                repo_name: dirents.repo_name,
+                site_root: app.config.siteRoot
             }));
         },
-        renderLibop: function () {
-            var path = this.collection.path;
+        renderLibop: function () { // todo
+            var dirents = this.collection;
+            var path = dirents.path;
+
+            var libop = $('.repo-file-list-topbar .repo-op');
+            if (!$.trim(libop.html())) { // for 'myhome'
+                libop.html($.trim(this.libop_template({
+                    user_perm: dirents.user_perm,
+                    no_quota: dirents.no_quota,
+                    encrypted: dirents.encrypted,
+                    path: path,
+                    share: dirents.share,
+                    repo_id: dirents.repo_id
+                })));
+            }
+
             if (path == '/') {
                 $('#share-cur-dir').remove();
             } else {

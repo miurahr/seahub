@@ -569,7 +569,7 @@ $(document).click(function(e) {
         no_file_op_popup = true;
         if (!popup_tr.find('*').is(target)) {
             popup_tr.removeClass('hl').find('.repo-file-op').addClass('vh'); // clicked place: the first tr, place out of the table
-            $('tr:gt(0)').each(function() { // when other tr is clicked
+            $('.repo-file-list tr:gt(0)').each(function() { // when other tr is clicked
                 if ($(this).find('*').is(target)) {
                     $(this).addClass('hl').find('.repo-file-op').removeClass('vh');
                 }
