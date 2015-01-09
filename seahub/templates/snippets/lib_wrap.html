@@ -1,0 +1,23 @@
+{% load i18n %}
+{# for repo view #}
+<div id="repo-file-list" class="hide">
+    <div class="repo-file-list-topbar">
+        <p class="path fleft"></p>
+        <div class="repo-op fright"></div>
+        <div class="clear"></div>
+    </div>
+    <table class="repo-file-list">
+        <tr>
+            <th class="select">
+                <span class="checkbox"><input type="checkbox" class="checkbox-orig" /></span>
+            </th>
+            <th class="star"></th>
+            <th class="dirent-icon"></th>
+            <th><span class="dirent-name">{% trans "Name"%} <span id="by-name" class="icon-caret-up cspt"></span></span></th>
+            <th class="dirent-size">{% trans "Size"%}</th>
+            <th class="dirent-update">{% trans "Last Update" %} <span id="by-time" class="icon-caret-down cspt"></span></th>
+            <th class="dirent-op">{% trans "Operations"%}</th>
+        </tr>
+    </table>
+    <img class="loading-tip" src="{{MEDIA_URL}}img/loading-icon.gif" alt="{% trans 'Loading...' %}" />
+</div>

@@ -13,7 +13,9 @@
             */
         },
         routes: {
-            'lib/:repo_id/dir/(*path)': 'get_dirents'
+            'lib/:repo_id/dir/(*path)': 'get_dirents',
+            'home/my/lib/:repo_id/dir/(*path)': 'get_dirents'
+            //'home/my/': 'back_home'
         },
         get_dirents: function(repo_id, path) {
             this.libdirents = new app.collections.LibDirents();
@@ -53,7 +55,11 @@
                     }
                 }
             });
-        }
+        }/*,
+        back_home: function () {
+            $('#tabs').show();
+            $('#repo-file-list').hide();
+        }*/
     });
 
     app.router = new app.Router();

@@ -91,6 +91,7 @@ urlpatterns = patterns('',
     ### lib ###
     url(r'^lib/(?P<repo_id>[-0-9a-f]{36})/dir/(?P<path>.*)$', lib, name='lib'),
     url(r'^lib/(?P<repo_id>[-0-9a-f]{36})/file/(?P<path>.*)$', file_view, name='file_view'),
+    url(r'^home/my/lib/(?P<repo_id>[-0-9a-f]{36})/dir/(?P<path>.*)$', myhome_lib, name='myhome_lib'),
 
     ### share file/dir, upload link ###
     url(r'^s/f/(?P<token>[a-f0-9]{10})/$', view_priv_shared_file, name="view_priv_shared_file"),

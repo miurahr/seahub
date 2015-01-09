@@ -1,0 +1,136 @@
+{% load i18n %}
+<script type="text/template" id="path-template">
+    <a href="<%= site_root %>lib/<%= repo_id %>/dir/" class="path-link normal"><%= repo_name %></a> /
+    <% for (var i = 0,len = path_list.length; i < len; i++) { %>
+        <% if (i == len - 1) { %>
+            <% print(path_list[i] + ' /'); %>
+        <% } else { %>
+            <a href="<%= site_root %>lib/<%= repo_id %>/dir/<% print(path_list.slice(0, i+1).join('/')); %>/" class="path-link normal"><%= path_list[i] %></a> /
+        <% } %>
+    <% } %>
+</script>
+
+<script type="text/template" id="libop-template">
+    <% if (user_perm == 'rw') { %>
+        <% if (no_quota) { %>
+    <button id="upload-file" class="op-btn">{% trans "Upload" %}</button>
+        <% } else { %>
+    <div id="upload-file" class="op-btn upload-file-btn">
+        <span>{% trans "Upload"%}</span>
+        <input type="file" name="file" multiple />
+    </div>
+    {% if enable_upload_folder %}
+    <ul id="upload-menu" class="hide">
+        <li class="item">
+        <span>{% trans "Upload Files" %}</span>
+        <input type="file" name="file" multiple />
+        </li>
+        <li class="item">
+        <span>{% trans "Upload Folder" %}</span>
+        <input type="file" name="file" multiple directory webkitdirectory />
+        </li>
+    </ul>
+    {% endif %}
+        <% } %>
+    <button id="add-new-dir" class="op-btn">{% trans "New Directory" %}</button>
+    <button id="add-new-file" class="op-btn">{% trans "New File" %}</button>
+    <% } %>
+
+    <% if (path != '/' && !encrypted) { %>
+    <button class="op-btn" id="share-cur-dir" data-link="<%= share.link %>" data-token="<%= share.token %>" data-upload-link="<%= share.upload_link %>" data-upload-token="<%= share.upload_token %>" data-url="{% url 'get_shared_link' %}?repo_id=<% print(e(repo_id)); %>&type=d&p=<% print(e(path)); %>" data-upload-url="{% url 'get_shared_upload_link' %}?repo_id=<% print(e(repo_id)); %>&p=<% print(e(path)); %>">{% trans "Share" %}</button>
+    <% } %>
+</script>
+
+<script type="text/template" id="dirent-template">
+    <% if (dirent.is_dir) { %>
+            <td class="select">
+                <span class="checkbox"><input type="checkbox" class="checkbox-orig" /></span>
+            </td>
+            <td class="star"></td>
+            <td class="dirent-icon"><img src="<%= media_url %>img/folder-icon-24.png" alt="{% trans "Directory icon" %}" /></td>
+            <td>
+                <span class="dirent-name"><a href="<%= site_root %>lib/<%= repo_id %>/dir/<% print(dirent.p_dpath.substr(1) + '/'); %>" class="dir-link normal"><%= dirent.obj_name %></a></span>
+            </td>
+            <td class="dirent-size"></td>
+            <td class="dirent-update">
+                <% if (dirent.last_modified) { %>
+                    <% print(dirent.last_update); %>
+                <% } else { %>
+                    <% print("{% trans "Fetch failed" %}"); %>
+                <% } %>
+            </td>
+            <td class="dirent-op">
+                <div class="repo-file-op vh">
+                    <div class="displayed-op">
+                        <a class="op download" href="<%= site_root %>repo/download_dir/<%= repo_id %>/?p=<% print(e(dirent.p_dpath)); %>" title="{% trans "Download" %}"><img src="<%= media_url %>img/download.png" alt="" /></a>
+                        <% if (!repo_encrypted) { %>
+                        <a class="op share" href="#" data-link="<%= dirent.sharelink %>" data-token="<%= dirent.sharetoken %>" data-upload-link="<%= dirent.uploadlink %>" data-upload-token="<%= dirent.uploadtoken %>" title="{% trans "Share" %}"><img src="<%= media_url %>img/share_20.png" alt="" /></a>
+                        <% } %>
+                    </div>
+                    <% if (user_perm == 'rw') { %>
+                    <img src="<%= media_url %>img/dropdown-arrow.png" title="{% trans "More operations" %}" alt="{% trans "More operations" %}" class="more-op-icon cspt" />
+                    <ul class="hidden-op hide">
+                        <li><a class="op del" href="#">{% trans "Delete" %}</a></li>
+                        <li><a class="op rename" href="#">{% trans "Rename" %}</a></li>
+                        <li><a class="op mv" href="#">{% trans "Move" %}</a></li>
+                        <li><a class="op cp" href="#">{% trans "Copy" %}</a></li>
+                    </ul>
+                    <% } %>
+                </div>
+            </td>
+    <% } else { %>
+            <td class="select">
+                <span class="checkbox"><input type="checkbox" class="checkbox-orig" /></span>
+            </td>
+            <td class="star alc">
+                <% if (dirent.starred) { %>
+                    <span title="{% trans "starred" %}" class="icon-star file-star"></span>
+                <% } else { %>
+                    <span title="{% trans "unstarred" %}" class="icon-star-empty file-star"></span>
+                <% } %>
+            </td>
+            <td class="dirent-icon">
+                <% if (dirent.is_img) { %>
+                    <% if (dirent.thumbnail_src) { %>
+                        <img class="thumbnail" src="<%= dirent.thumbnail_src %>" alt="" />
+                    <% } else { %>
+                        <img class="not-thumbnail" src="<%= media_url %>img/file/<%= dirent.file_icon %>" alt="" />
+                    <% } %>
+                <% } else { %>
+                    <img src="<%= media_url %>img/file/<%= dirent.file_icon %>" alt="" />
+                <% } %>
+            </td>
+            <td>
+                <span class="dirent-name"><a class="normal" href="<%= site_root %>lib/<%= repo_id %>/file<% print(path + dirent.obj_name); %>" target="_blank"><%= dirent.obj_name %></a></span>
+            </td>
+            <td class="dirent-size"><%= dirent.file_size %></td>
+            <td class="dirent-update">
+                <% if (dirent.last_modified) { %>
+                    <% print(dirent.last_update); %>
+                <% } else { %>
+                    <% print("{% trans "Fetch failed" %}"); %>
+                <% } %>
+            </td>
+            <td class="dirent-op">
+                <div class="repo-file-op vh">
+                    <div class="displayed-op">
+                        <a class="op download" href="<%= site_root %>repo/<%= repo_id %>/<%= dirent.obj_id %>/download/?p=<% print(e(path+dirent.obj_name)); %>" title="{% trans "Download" %}"><img src="<%= media_url %>img/download.png" alt="" /></a>
+                        <% if (!repo_encrypted) { %>
+                        <a class="op share" href="#" data-link="<%= dirent.sharelink %>" data-token="<%= dirent.sharetoken %>" title="{% trans "Share" %}"><img src="<%= media_url %>img/share_20.png" alt="" /></a>
+                        <% } %>
+                    </div>
+                    <% if (user_perm == 'rw') { %>
+                    <img src="<%= media_url %>img/dropdown-arrow.png" title="{% trans "More Operations"%}" alt="{% trans "More Operations"%}" class="more-op-icon cspt" />
+                    <ul class="hidden-op hide">
+                        <li><a class="op del" href="#">{% trans "Delete" %}</a></li>
+                        <li><a class="op rename" href="#">{% trans "Rename" %}</a></li>
+                        <li><a class="op mv" href="#">{% trans "Move" %}</a></li>
+                        <li><a class="op cp" href="#">{% trans "Copy" %}</a></li>
+                        <li><a class="op file-update" href="#">{% trans "Update"%}</a></li>
+                        <li><a class="op file-history" href="<%= site_root %>repo/file_revisions/<%= repo_id %>/?p=<% print(e(path+dirent.obj_name)); %>" target="_blank">{% trans "History" %}</a></li>
+                    </ul>
+                    <% } %>
+                </div>
+            </td>
+    <% } %>
+</script>

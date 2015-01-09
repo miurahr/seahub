@@ -1,0 +1,62 @@
+{% extends "home_base.html" %}
+{% load seahub_tags i18n %}
+
+{% block sub_title %}{% trans "Libraries" %} - {% endblock %}
+
+{% block extra_style %}
+<style type="text/css">
+/* lib view */
+.repo-file-list .dirent-name {
+    width:300px;
+}
+.repo-file-list .dirent-size {
+    width:104px;
+}
+.repo-file-list .dirent-update {
+    width:103px;
+}
+.repo-file-list .dirent-op {
+    width:100px;
+}
+</style>
+{% endblock %}
+
+{% block cur_my_lib %}tab-cur{% endblock %}
+
+{% block right_panel %}
+{% include 'snippets/lib_wrap.html' %}
+{% endblock %}
+
+{% block app_page_script %}
+{% include 'snippets/lib_tpl.html' %}
+{% endblock %}
+
+{% block extra_script %}
+<script type="text/javascript">
+$('#repo-file-list').show();
+
+// for 'lib' view
+// global var
+var no_file_op_popup = true;
+var popup_tr;
+
+// hide 'hidden-op' popup
+$(document).click(function(e) {
+    var target =  e.target || event.srcElement;
+    if (!no_file_op_popup &&
+        !$('.more-op-icon, .hidden-op').is(target) &&
+        !$('.hidden-op').find('*').is(target)) {
+        $('.hidden-op').addClass('hide');
+        no_file_op_popup = true;
+        if (!popup_tr.find('*').is(target)) {
+            popup_tr.removeClass('hl').find('.repo-file-op').addClass('vh'); // clicked place: the first tr, place out of the table
+            $('.repo-file-list tr:gt(0)').each(function() { // when other tr is clicked
+                if ($(this).find('*').is(target)) {
+                    $(this).addClass('hl').find('.repo-file-op').removeClass('vh');
+                }
+            });
+        }
+    }
+});
+</script>
+{% endblock %}

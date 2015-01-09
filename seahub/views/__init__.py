@@ -1061,6 +1061,13 @@ def myhome(request):
 
 @login_required
 @user_mods_check
+def myhome_lib(request, repo_id, path):
+
+    return render_to_response('myhome_lib.html', {
+            }, context_instance=RequestContext(request))
+
+@login_required
+@user_mods_check
 def starred(request):
     """List starred files.
 
