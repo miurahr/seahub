@@ -14,8 +14,8 @@
         },
         routes: {
             'lib/:repo_id/dir/(*path)': 'get_dirents',
-            'home/my/lib/:repo_id/dir/(*path)': 'get_dirents'
-            //'home/my/': 'back_home'
+            'home/my/lib/:repo_id/dir/(*path)': 'myhome_lib',
+            'home/my/': 'back_home'
         },
         get_dirents: function(repo_id, path) {
             this.libdirents = new app.collections.LibDirents();
@@ -55,11 +55,16 @@
                     }
                 }
             });
-        }/*,
+        },
+        myhome_lib: function (repo_id, path) {
+            $('#tabs').hide();
+            $('#repo-file-list').show();
+            this.get_dirents(repo_id, path);
+        },
         back_home: function () {
             $('#tabs').show();
             $('#repo-file-list').hide();
-        }*/
+        }
     });
 
     app.router = new app.Router();

@@ -207,7 +207,6 @@ $('.lib-link').click(function() {
     app.router.navigate('home/my' + $(this)[0].pathname.substr(app.config.siteRoot.length - 1), {trigger: true});
     $('#tabs').hide();
     $('#repo-file-list').show();
-    //console.log($(this)[0].pathname.substr(app.config.siteRoot.length - 1));
     return false;
 });
 //app.pages.myhome = {};
