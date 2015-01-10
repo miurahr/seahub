@@ -34,10 +34,6 @@
             var libview = this.libview; 
             libdirents.path = path;
 
-            if (app.pages.lib) {
-            libview.renderPath();
-            }
-
             var loading_tip = $('#repo-file-list .loading-tip');
             loading_tip.show();
 
@@ -45,7 +41,7 @@
             libdirents.fetch({
                 data: {'p': path},
                 success: function (collection, response, opts) {
-                    libview.renderPath(); // for 'myhome' lib
+                    libview.renderPath();
                     libview.renderLibop();
 
                     // todo

@@ -375,37 +375,16 @@
                 site_root: app.config.siteRoot
             }));
         },
-        renderLibop: function () { // todo
+        renderLibop: function () {
             var dirents = this.collection;
-            var path = dirents.path;
-
-            var libop = $('.repo-file-list-topbar .repo-op');
-            if (!$.trim(libop.html())) { // for 'myhome'
-                libop.html($.trim(this.libop_template({
-                    user_perm: dirents.user_perm,
-                    no_quota: dirents.no_quota,
-                    encrypted: dirents.encrypted,
-                    path: path,
-                    share: dirents.share,
-                    repo_id: dirents.repo_id
-                })));
-            }
-
-            if (path == '/') {
-                $('#share-cur-dir').remove();
-            } else {
-                var share_btn = $.trim(this.libop_template({
-                    path: path,
-                    share: this.collection.share
-                }));
-                if (share_btn) {
-                    if ($('#share-cur-dir').length > 0) {
-                        $('#share-cur-dir').replaceWith(share_btn);
-                    } else {
-                        $('.repo-file-list-topbar .repo-op').append(share_btn);
-                    }
-                }
-            }
+            $('.repo-file-list-topbar .repo-op').html($.trim(this.libop_template({
+                user_perm: dirents.user_perm,
+                no_quota: dirents.no_quota,
+                encrypted: dirents.encrypted,
+                path: dirents.path,
+                share: dirents.share,
+                repo_id: dirents.repo_id
+            })));
         },
         addOne: function (dirent) {
             var dirents = this.collection;
