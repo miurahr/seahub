@@ -24,6 +24,7 @@
             if (app.pages.lib) { // todo: better coding
             app.pages.lib.dirents = this.libdirents;
             }
+            app.libdirents = this.libdirents; // any better coding?
 
             if (!path) {
                 path = '/';
@@ -43,9 +44,7 @@
                 success: function (collection, response, opts) {
                     libview.renderPath();
                     libview.renderLibop();
-
-                    // todo
-                    // last_start = 0; // for 'more'
+                    libdirents.last_start = 0; // for 'more'
                     if (response.dirent_list.length == 0) { // the dir is empty
                         loading_tip.hide();
                     }

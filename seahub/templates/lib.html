@@ -549,14 +549,12 @@ $('#upload-file-dialog .close').click(function() {
 var no_file_op_popup = true;
 var popup_tr;
 
-
-var last_start = 0; // to stop repeated request
 $(window).scroll(function() {
     // scroll to the bottom, trigger 'request more'
-    var dirents = app.pages.lib.dirents;
+    var dirents = app.libdirents;
     var start = dirents.more_start;
-    if (dirents.dirent_more && $(window).scrollTop() + $(window).height() > $(document).height() - parseInt($('#repo-file-list').css('margin-bottom')) && start != last_start) {
-        last_start = start;
+    if (dirents.dirent_more && $(window).scrollTop() + $(window).height() > $(document).height() - parseInt($('#repo-file-list').css('margin-bottom')) && start != dirents.last_start) {
+        dirents.last_start = start;
         dirents.more();
     }
 });
