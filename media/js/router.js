@@ -24,7 +24,8 @@
             if (app.pages.lib) { // todo: better coding
             app.pages.lib.dirents = this.libdirents;
             }
-            app.libdirents = this.libdirents; // any better coding?
+            //app.libdirents = this.libdirents; // any better coding?
+            app.libview = this.libview;
 
             if (!path) {
                 path = '/';

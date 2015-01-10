@@ -992,6 +992,14 @@
                 }
                 return false;
             });
+        },
+        onWindowScroll: function () {
+            var dirents = this.collection;
+            var start = dirents.more_start;
+            if (dirents.dirent_more && $(window).scrollTop() + $(window).height() > $(document).height() - parseInt($('#repo-file-list').css('margin-bottom')) && start != dirents.last_start) {
+                dirents.last_start = start;
+                dirents.more();
+            }
         }
     });
 }(window, app, Backbone, jQuery, _));
