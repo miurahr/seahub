@@ -98,7 +98,11 @@
             // empty all models
             this.collection.reset();
             // update url & dirents
-            app.router.navigate(this.$('.dir-link')[0].pathname.substr(app.config.siteRoot.length - 1), {trigger: true}); // offer an url fragment
+            var siteRoot_len = app.config.siteRoot.length,
+                url_base = app.page.dir_url_base,
+                dir_url = this.$('.dir-link')[0].pathname,
+                url = url_base ? url_base + dir_url.substr(siteRoot_len) : dir_url.substr(siteRoot_len - 1);
+            app.router.navigate(url, {trigger: true}); // offer an url fragment
             return false;
         },
         togglePopup: function () {
@@ -467,8 +471,15 @@
         },
         visitDir: function () {
             var path_link = event.target || event.srcElement;
+
+            var siteRoot_len = app.config.siteRoot.length,
+                url_base = app.page.dir_url_base,
+                dir_url = path_link.pathname, // 'pathname': relative url
+                url = url_base ? url_base + dir_url.substr(siteRoot_len) : dir_url.substr(siteRoot_len - 1);
+
             // when cur dir is root dir, and click the link on root dir in '.path'
-            if (path_link.pathname == location.pathname) { // 'router.navigate()' won't send request
+            // 'router.navigate()' won't send request
+            if ('/' + url == location.pathname || url == location.pathname) { // the latter is for 'lib' page
                 //router.get_dirents();
                 return false;
             }
@@ -481,7 +492,7 @@
             // empty all models
             this.collection.reset();
             // update url & dirents
-            app.router.navigate(path_link.pathname.substr(app.config.siteRoot.length - 1), {trigger: true}); // 'pathname': relative url
+            app.router.navigate(url, {trigger: true}); // offer an url fragment
             return false;
         },
         uploadFile: function () {

@@ -203,13 +203,13 @@ $(document).click(function(e) {
 
 {% block app_page_script %}
 <script type="text/javascript">
+app.page.dir_url_base = 'home/my/';
 $('.lib-link').click(function() {
-    app.router.navigate('home/my' + $(this)[0].pathname.substr(app.config.siteRoot.length - 1), {trigger: true});
+    app.router.navigate(app.page.dir_url_base + $(this)[0].pathname.substr(app.config.siteRoot.length), {trigger: true});
     $('#tabs').hide();
     $('#repo-file-list').show();
     return false;
 });
-//app.pages.myhome = {};
 </script>
 {% include 'snippets/lib_tpl.html' %}
 {% endblock %}
