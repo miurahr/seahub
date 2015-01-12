@@ -78,6 +78,7 @@
 {% endif %}
 
 {% include 'snippets/lib_wrap.html' %}
+{% include "snippets/lib_op_popups.html" %} {# include rename #}
 {% endblock %}
 
 {% block extra_script %}{{block.super}}
@@ -173,38 +174,8 @@ $('.submit', sublib_create_form).click(function() {
 });
 {% endif %}
 {% include "snippets/repo_create_js.html" with post_url=repo_create_url %}
-
-// for 'lib' view
-// global var
-var no_file_op_popup = true;
-var popup_tr;
-
-// hide 'hidden-op' popup
-$(document).click(function(e) {
-    var target =  e.target || event.srcElement;
-    if (!no_file_op_popup &&
-        !$('.more-op-icon, .hidden-op').is(target) &&
-        !$('.hidden-op').find('*').is(target)) {
-        $('.hidden-op').addClass('hide');
-        no_file_op_popup = true;
-        if (!popup_tr.find('*').is(target)) {
-            popup_tr.removeClass('hl').find('.repo-file-op').addClass('vh'); // clicked place: the first tr, place out of the table
-            $('.repo-file-list tr:gt(0)').each(function() { // when other tr is clicked
-                if ($(this).find('*').is(target)) {
-                    $(this).addClass('hl').find('.repo-file-op').removeClass('vh');
-                }
-            });
-        }
-    }
-});
-
-$(window).scroll(function() {
-    if ($('#repo-file-list').is(':visible')) {
-        app.libview.onWindowScroll();
-    }
-});
-
 </script>
+{% include "snippets/lib_script.html" %}
 {% endblock %}
 
 {% block app_page_script %}

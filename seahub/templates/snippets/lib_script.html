@@ -1,0 +1,62 @@
+{% load i18n %}
+<script type="text/javascript">
+var no_file_op_popup = true;
+var popup_tr;
+
+// hide 'hidden-op' popup
+$(document).click(function(e) {
+    var target =  e.target || event.srcElement;
+    if (!no_file_op_popup &&
+        !$('.more-op-icon, .hidden-op').is(target) &&
+        !$('.hidden-op').find('*').is(target)) {
+        $('.hidden-op').addClass('hide');
+        no_file_op_popup = true;
+        if (!popup_tr.find('*').is(target)) {
+            popup_tr.removeClass('hl').find('.repo-file-op').addClass('vh'); // clicked place: the first tr, place out of the table
+            $('.repo-file-list tr:gt(0)').each(function() { // when other tr is clicked
+                if ($(this).find('*').is(target)) {
+                    $(this).addClass('hl').find('.repo-file-op').removeClass('vh');
+                }
+            });
+        }
+    }
+});
+
+$(window).scroll(function() {
+    if ($('#repo-file-list').is(':visible')) {
+        app.libview.onWindowScroll();
+    }
+});
+
+function ajaxPost(params) { // params: {}
+    var form = params.form,
+        post_url = params.post_url,
+        post_data = params.post_data,
+        after_op_success = params.after_op_success,
+        form_id = params.form_id;
+    var submit_btn = form.children('[type="submit"]');
+    disable(submit_btn);
+    $.ajax({
+        url: post_url,
+        type: 'POST',
+        dataType: 'json',
+        beforeSend: prepareCSRFToken,
+        data: post_data,
+        success: function(data) {
+            if (data['success']) {
+                after_op_success(data);
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            var err;
+            if (xhr.responseText) {
+                err = $.parseJSON(xhr.responseText).error;
+            } else {
+                err = "{% trans "Failed. Please check the network." %}";
+            }
+            apply_form_error(form_id, err);
+            enable(submit_btn);
+        }
+    });
+}
+</script>

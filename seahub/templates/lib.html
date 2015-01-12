@@ -157,15 +157,7 @@
 
     {% include "snippets/file_share_popup.html" %} {# dir/file share popup, need ENABLE_SUB_LIBRARY #}
 
-    <form id="rename-form" action="" method="post" class="hide">{% csrf_token %}
-        <h3></h3>
-        <p class="detail">{% trans "Rename %(name)s as:" %}</p>
-        <input type="hidden" name="oldname" value="" />
-        <input type="text" name="newname" value="" class="input" maxlength="{{max_file_name}}"/><br />
-        <p class="error hide"></p>
-        <button type="submit" class="submit">{% trans "Submit" %}</button>
-        <button class="simplemodal-close">{% trans "Cancel" %}</button>
-    </form>
+    {% include "snippets/lib_op_popups.html" %} {# include rename #}
 
     <form id="mv-form" action="" method="post" class="file-choose-form hide">{% csrf_token %}
         <div id="mv-dir-list" class="dir-tree-cont">
@@ -542,65 +534,8 @@ $('#upload-file-dialog .close').click(function() {
 });
 </script>
 {% endif %}
+{% include "snippets/lib_script.html" %}
 <script type="text/javascript">
-// global var
-var no_file_op_popup = true;
-var popup_tr;
-
-$(window).scroll(function() {
-     app.libview.onWindowScroll();
-});
-
-// hide 'hidden-op' popup
-$(document).click(function(e) {
-    var target =  e.target || event.srcElement;
-    if (!no_file_op_popup &&
-        !$('.more-op-icon, .hidden-op').is(target) &&
-        !$('.hidden-op').find('*').is(target)) {
-        $('.hidden-op').addClass('hide');
-        no_file_op_popup = true;
-        if (!popup_tr.find('*').is(target)) {
-            popup_tr.removeClass('hl').find('.repo-file-op').addClass('vh'); // clicked place: the first tr, place out of the table
-            $('.repo-file-list tr:gt(0)').each(function() { // when other tr is clicked
-                if ($(this).find('*').is(target)) {
-                    $(this).addClass('hl').find('.repo-file-op').removeClass('vh');
-                }
-            });
-        }
-    }
-});
-
-function ajaxPost(params) { // params: {}
-    var form = params.form,
-        post_url = params.post_url,
-        post_data = params.post_data,
-        after_op_success = params.after_op_success,
-        form_id = params.form_id;
-    var submit_btn = form.children('[type="submit"]');
-    disable(submit_btn);
-    $.ajax({
-        url: post_url,
-        type: 'POST',
-        dataType: 'json',
-        beforeSend: prepareCSRFToken,
-        data: post_data,
-        success: function(data) {
-            if (data['success']) {
-                after_op_success(data);
-            }
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            var err;
-            if (xhr.responseText) {
-                err = $.parseJSON(xhr.responseText).error;
-            } else {
-                err = "{% trans "Failed. Please check the network." %}";
-            }
-            apply_form_error(form_id, err);
-            enable(submit_btn);
-        }
-    });
-}
 function setDirentsOpPos() {
     var dirents_op = $('#dirents-op');
     dirents_op.css({
@@ -879,15 +814,6 @@ app.pages.lib = {
     config: {
         repo_id: '{{repo.id}}',
         urls: {
-            get_lib_dirents: '{% url 'get_lib_dirents' repo.id %}',
-            repo_unstar_file: '{% url 'repo_unstar_file' repo.id %}',
-            repo_star_file: '{% url 'repo_star_file' repo.id %}',
-            get_shared_link: '{% url 'get_shared_link' %}?repo_id={{ repo.id }}',
-            get_shared_upload_link: '{% url 'get_shared_upload_link' %}?repo_id={{ repo.id }}',
-            delete_dir: '{% url 'delete_dir' repo.id %}',
-            delete_file: '{% url 'delete_file' repo.id %}',
-            rename_dir: '{% url 'rename_dir' repo.id %}',
-            rename_file: '{% url 'rename_file' repo.id %}',
             thumbnail_create: '{% url 'thumbnail_create' repo.id %}',
             new_dir: '{% url 'new_dir' repo.id %}',
             new_file: '{% url 'new_file' repo.id %}',

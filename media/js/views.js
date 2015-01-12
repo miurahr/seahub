@@ -71,12 +71,14 @@
         },
         starFile: function () {
             var _this = this;
-            var path = this.collection.path;
+            var col = this.collection;
+            var path = col.path == '/' ? '/' : col.path + '/';
             var starred = this.model.get('starred');
-            var ajax_url = starred ? app.pages.lib.config.urls.repo_unstar_file : app.pages.lib.config.urls.repo_star_file;
-            ajax_url += '?file=' + e(path + this.model.get('obj_name'));
+            var url = '/ajax/repo/' + col.repo_id + '/file/';
+            url += starred ? 'unstar/' : 'star/';
+            url += '?file=' + e(path + this.model.get('obj_name'));
             $.ajax({
-                url: ajax_url,
+                url: url,
                 dataType: 'json',
                 cache: false,
                 success: function () {
@@ -137,10 +139,12 @@
         share: function () {
             var op = this.$('.share'),
                 name = this.model.get('obj_name');
-            var cur_path = this.collection.path;
+            var col = this.collection;
+            var cur_path = col.path;
+            var repo_id = col.repo_id;
             var ajax_urls = {
-                'link': app.pages.lib.config.urls.get_shared_link + '&p=' + e(cur_path + name),
-                'upload-link': app.pages.lib.config.urls.get_shared_upload_link + '&p=' + e(cur_path + name)
+                'link': app.urls.get_shared_link + '?repo_id=' + e(repo_id) + '&p=' + e(cur_path + name),
+                'upload-link': app.urls.get_shared_upload_link + '?repo_id=' + e(repo_id) + '&p=' + e(cur_path + name)
             };
             var type = this.model.get('is_dir') ? 'd' : 'f';
             if (type == 'd') {
@@ -151,18 +155,20 @@
         },
         delete: function () {
             var dirent_name = this.model.get('obj_name');
-            var url_main = this.model.get('is_dir') ? app.pages.lib.config.urls.delete_dir : app.pages.lib.config.urls.delete_file;
+            var col = this.collection;
+            var url_main = '/ajax/repo/' + col.repo_id;
+            url_main += this.model.get('is_dir') ? '/dir' : '/file';
+            url_main += '/delete/';
             var el = this.$el;
-            var path = this.collection.path;
             $.ajax({
-                url: url_main + '?parent_dir=' + e(path) + '&name=' + e(dirent_name),
+                url: url_main + '?parent_dir=' + e(col.path) + '&name=' + e(dirent_name),
                 dataType: 'json',
                 success: function(data) {
                     el.remove();
                     no_file_op_popup = true;// make other items can work normally when hover
                     //var msg = "{% trans "Successfully deleted %(name)s" %}"; // todo
-                    //var msg = "Successfully deleted %(name)s";
-                    var msg = app.pages.lib.config.msgs.successDel;
+                    var msg = "Successfully deleted %(name)s";
+                    //var msg = app.pages.lib.config.msgs.successDel;
                     msg = msg.replace('%(name)s', dirent_name);
                     feedback(msg, 'success');
                 },
@@ -186,7 +192,7 @@
             op_detail.html(op_detail.html().replace('%(name)s', '<span class="op-target">' + dirent_name + '</span>'));
 
             var _this = this;
-            var path = this.collection.path;
+            var col = this.collection;
             form.submit(function() {
                 var new_name = $.trim($('[name="newname"]', form).val());
                 if (!new_name) {
@@ -200,8 +206,9 @@
                     return false;
                 }
                 var post_data = {'oldname': dirent_name, 'newname':new_name};
-                var post_url = is_dir ? app.pages.lib.config.urls.rename_dir : app.pages.lib.config.urls.rename_file;
-                post_url += '?parent_dir=' + e(path);
+                var post_url = '/ajax/repo/' + col.repo_id;
+                post_url += is_dir ? '/dir' : '/file';
+                post_url += '/rename/?parent_dir=' + e(col.path);
                 var after_op_success = function (data) {
                     new_name = data['newname'];
                     var now = new Date().getTime()/1000;

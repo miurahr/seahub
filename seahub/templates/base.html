@@ -145,11 +145,14 @@ var app = {
     pages: {},
     page: {},
     utils: {},
-    {% with repo_id='b1f848b7-96a2-418d-8182-91ab4c4835eb' %}
     urls: {
-        get_lib_dirents: '{% url 'get_lib_dirents' repo_id %}'
+        {% with repo_id='b1f848b7-96a2-418d-8182-91ab4c4835eb' %}
+        get_lib_dirents: '{% url 'get_lib_dirents' repo_id %}',
+        {% endwith %}
+        get_shared_link: '{% url 'get_shared_link' %}',
+        get_shared_upload_link: '{% url 'get_shared_upload_link' %}'
+
     }
-    {% endwith %}
 };
 </script>
 {% block app_page_script %}{% endblock %}
