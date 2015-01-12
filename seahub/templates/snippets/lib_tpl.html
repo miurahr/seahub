@@ -1,11 +1,15 @@
 {% load i18n %}
 <script type="text/template" id="path-template">
-    <a href="<%= site_root %>lib/<%= repo_id %>/dir/" class="path-link normal"><%= repo_name %></a> /
-    <% for (var i = 0,len = path_list.length; i < len; i++) { %>
-        <% if (i == len - 1) { %>
-            <% print(path_list[i] + ' /'); %>
-        <% } else { %>
-            <a href="<%= site_root %>lib/<%= repo_id %>/dir/<% print(path_list.slice(0, i+1).join('/')); %>/" class="path-link normal"><%= path_list[i] %></a> /
+    <% if (path == '/') { %>
+        <%= repo_name %> /
+    <% } else { %>
+        <a href="<%= site_root %>lib/<%= repo_id %>/dir/" class="path-link normal"><%= repo_name %></a> /
+        <% for (var i = 0,len = path_list.length; i < len; i++) { %>
+            <% if (i == len - 1) { %>
+                <% print(path_list[i] + ' /'); %>
+            <% } else { %>
+                <a href="<%= site_root %>lib/<%= repo_id %>/dir/<% print(path_list.slice(0, i+1).join('/')); %>/" class="path-link normal"><%= path_list[i] %></a> /
+            <% } %>
         <% } %>
     <% } %>
 </script>

@@ -49,9 +49,7 @@
 
     <div id="repo-file-list">
         <div class="repo-file-list-topbar">
-            <p class="path fleft">
-            <a href="{% url 'lib' repo.id '' %}" class="path-link normal">{{ repo.name }}</a> /
-            </p>
+            <p class="path fleft"></p>
             <div class="repo-op fright">
                 {% if user_perm == 'rw' %}
                     {% if no_quota %}

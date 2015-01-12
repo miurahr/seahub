@@ -364,16 +364,18 @@
         renderPath: function () {
             var dirents = this.collection;
             var path = dirents.path,
-                path_list = [];
+                obj = {
+                    path: path,
+                    repo_name: dirents.repo_name
+                };
             if (path != '/') {
-                path_list = path.substr(1).split('/');
+                $.extend(obj, {
+                    path_list: path.substr(1).split('/'),
+                    repo_id: dirents.repo_id,
+                    site_root: app.config.siteRoot
+                });
             }
-            $('.repo-file-list-topbar .path').html(this.path_template({
-                path_list: path_list,
-                repo_id: dirents.repo_id,
-                repo_name: dirents.repo_name,
-                site_root: app.config.siteRoot
-            }));
+            $('.repo-file-list-topbar .path').html(this.path_template(obj));
         },
         renderLibop: function () {
             var dirents = this.collection;
@@ -458,10 +460,12 @@
 
             // when cur dir is root dir, and click the link on root dir in '.path'
             // 'router.navigate()' won't send request
+            /*
             if ('/' + url == location.pathname || url == location.pathname) { // the latter is for 'lib' page
                 //router.get_dirents();
                 return false;
             }
+            */
             // show 'loading'
             var path = this.$('.path');
             // check if loading_icon is already there, in case some users may repeatly click the link
