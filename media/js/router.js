@@ -3,22 +3,7 @@
 
     app.Router = Backbone.Router.extend({
         initialize: function () {
-            /*
             this.libdirents = new app.collections.LibDirents(); 
-            this.libview = new app.views.LibView({collection: this.libdirents});
-
-            app.pages.lib.dirents = this.libdirents;
-            
-            this.route('lib/' + app.pages.lib.config.repo_id + '/dir/(*path)', 'get_dirents', this.get_dirents);
-            */
-        },
-        routes: {
-            'lib/:repo_id/dir/(*path)': 'get_dirents',
-            'home/my/lib/:repo_id/dir/(*path)': 'myhome_lib',
-            'home/my/': 'back_home'
-        },
-        get_dirents: function(repo_id, path) {
-            this.libdirents = new app.collections.LibDirents();
             this.libview = new app.views.LibView({collection: this.libdirents});
 
             if (app.pages.lib) { // todo: better coding
@@ -26,7 +11,13 @@
             }
             //app.libdirents = this.libdirents; // any better coding?
             app.libview = this.libview;
-
+        },
+        routes: {
+            'lib/:repo_id/dir/(*path)': 'get_dirents',
+            'home/my/lib/:repo_id/dir/(*path)': 'myhome_lib',
+            'home/my/': 'back_home'
+        },
+        get_dirents: function(repo_id, path) {
             if (!path) {
                 path = '/';
             } else {

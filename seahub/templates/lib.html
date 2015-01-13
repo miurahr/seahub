@@ -122,39 +122,6 @@
         {% endif %}
     </div>
 
-    <form id="add-new-dir-form" action="" method="post" class="hide">{% csrf_token %}
-        <h3>{% trans "New Directory" %}</h3>
-        <label>{% trans "Directory Name" %}</label><br />
-        <input type="text" name="name" value="" class="input" maxlength="{{max_file_name}}"/><br />
-        <p class="error hide"></p>
-        <button type="submit" class="submit">{% trans "Submit" %}</button>
-        <button class="simplemodal-close">{% trans "Cancel" %}</button>
-    </form>
-
-    <form id="add-new-file-form" action="" method="post" class="hide">{% csrf_token %}
-        <h3>{% trans "New File" %}</h3>
-        <div id="featured-filetype">
-            <label>{% trans "Featured File Type" %}</label><br />
-            <button type="button" class="set-file-type" data-filetype="seaf" title="{% trans "Click to choose" %}">seaf</button> <span>{% trans "online Rich Text format." %}</span>
-            {% if LANGUAGE_CODE == 'zh-cn' %}
-            <a href="http://www.seafile.com/help/seaf/" target="_blank">{% trans 'Details' %}</a><br />
-            {% else %}
-            <a href="http://www.seafile.com/en/help/seaf/" target="_blank">{% trans 'Details' %}</a><br />
-            {% endif %}
-            <button type="button" class="set-file-type" data-filetype="md" title="{% trans "Click to choose" %}">markdown</button> <span>{% trans "simple markup format." %}</span>
-            {% if LANGUAGE_CODE == 'zh-cn' %}
-            <a href="http://www.seafile.com/help/markdown/" target="_blank">{% trans 'Details' %}</a>
-            {% else %}
-            <a href="http://www.seafile.com/en/help/markdown/" target="_blank">{% trans 'Details' %}</a>
-            {% endif %}
-        </div>
-        <label>{% trans "File Name" %}</label><br/>
-        <input type="text" name="name" value="" class="input" maxlength="{{max_file_name}}"/><br />
-        <p class="error hide"></p>
-        <button type="submit" class="submit">{% trans "Submit" %}</button>
-        <button class="simplemodal-close">{% trans "Cancel" %}</button>
-    </form>
-
     {% include "snippets/file_share_popup.html" %} {# dir/file share popup, need ENABLE_SUB_LIBRARY #}
 
     {% include "snippets/lib_op_popups.html" %} {# include rename #}
@@ -814,9 +781,6 @@ app.pages.lib = {
     config: {
         repo_id: '{{repo.id}}',
         urls: {
-            thumbnail_create: '{% url 'thumbnail_create' repo.id %}',
-            new_dir: '{% url 'new_dir' repo.id %}',
-            new_file: '{% url 'new_file' repo.id %}',
             delete_dirents: '{% url 'delete_dirents' repo.id %}',
             get_file_op_url: '{% url 'get_file_op_url' repo.id %}',
             mv_dirents: '{% url 'mv_dirents' repo.id %}',

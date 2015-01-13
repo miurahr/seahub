@@ -422,7 +422,7 @@
                         path = path + '/';
                     }
                     $.ajax({
-                        url: app.pages.lib.config.urls.thumbnail_create + '?path=' + e(path + file_name),
+                        url: '/thumbnail/' + dirents.repo_id + '/create/' + '?path=' + e(path + file_name),
                         cache: false,
                         dataType: 'json',
                         success: function(data) {
@@ -507,7 +507,7 @@
                     return false;
                 }
                 var post_data = {'dirent_name': dirent_name};
-                var post_url = app.pages.lib.config.urls.new_dir + '?parent_dir=' + e(dirents.path);
+                var post_url = '/ajax/repo/' + dirents.repo_id + '/dir/new/?parent_dir=' + e(dirents.path);
                 var after_op_success = function(data) {
                     $.modal.close();
                     var now = new Date().getTime()/1000;
@@ -537,7 +537,8 @@
             });
         },
         newFile: function () {
-            var path = this.collection.path;
+            var col = this.collection;
+            var path = col.path;
             var form = $('#add-new-file-form'),
                 form_id = form.attr('id');
             form.modal({appendTo:'#main', focus:false, containerCss:{'padding':'20px 25px'}});
@@ -556,12 +557,13 @@
                     return false;
                 }
                 var post_data = {'dirent_name': dirent_name};
-                var post_url = app.pages.lib.config.urls.new_file + '?parent_dir=' + e(path);
+                var post_url = '/ajax/repo/' + col.repo_id + '/file/new/?parent_dir=' + e(path);
                 var after_op_success = function(data) {
-                    if (path.charAt(path.length - 1) != '/') {
+                    $.modal.close(); // restore form initial state
+                    if (path != '/') {
                         path += '/';
                     }
-                    location.href = app.config.siteRoot + 'lib/' + app.pages.lib.config.repo_id + '/file' + path + data['name'];
+                    location.href = app.config.siteRoot + 'lib/' + col.repo_id + '/file' + path + data['name'];
                 };
                 ajaxPost({
                     'form': form,
