@@ -6,10 +6,7 @@
             this.libdirents = new app.collections.LibDirents(); 
             this.libview = new app.views.LibView({collection: this.libdirents});
 
-            if (app.pages.lib) { // todo: better coding
-            app.pages.lib.dirents = this.libdirents;
-            }
-            //app.libdirents = this.libdirents; // any better coding?
+            app.libdirents = this.libdirents;
             app.libview = this.libview;
         },
         routes: {

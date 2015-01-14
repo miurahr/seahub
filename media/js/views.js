@@ -254,6 +254,10 @@
             form.modal({appendTo:'#main', autoResize:true, focus:false});
             $('#simplemodal-container').css({'width':'auto', 'height':'auto'});
 
+            if (!this.collection.encrypted) {
+                $('#other-repos').show();
+            }
+
             if (op_type == 'mv') {
                 //form_hd = obj_type == 'dir'? "{% trans "Move Directory" %}":"{% trans "Move File" %}";
                 form_hd = obj_type == 'dir'? "Move Directory" : "Move File";
@@ -739,6 +743,10 @@
             var form = $('#mv-form');
             form.modal({appendTo:'#main', autoResize:true, focus:false});
             $('#simplemodal-container').css({'width':'auto', 'height':'auto'});
+
+            if (!this.collection.encrypted) {
+                $('#other-repos').show();
+            }
 
             var op = params.op,
                 //form_hd = op == 'mv' ? "{% trans "Move selected item(s) to:" %}" : "{% trans "Copy selected item(s) to:" %}";

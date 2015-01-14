@@ -59,4 +59,269 @@ function ajaxPost(params) { // params: {}
         }
     });
 }
+
+// render jstree for current path
+function render_jstree_for_cur_path() {
+    var form = $('#mv-form'),
+        file_tree = new FileTree(),
+        container = $('#current-repo-dirs'),
+        loading_tip = container.prev();
+
+    var dirents = app.libdirents,
+        repo_id = dirents.repo_id,
+        repo_name = dirents.repo_name,
+        cur_path = dirents.path;
+    if (cur_path != '/') {
+        cur_path += '/';
+    }
+    container.data('site_root', '{{SITE_ROOT}}');
+    $.ajax({
+        url: '/ajax/repo/' + repo_id + '/dirents/?path=' + e(cur_path) + '&dir_only=true&all_dir=true',
+        cache: false,
+        dataType: 'json',
+        success: function(data) {
+            var json_data = [];
+            var repo_data = {
+                'data': repo_name,
+                'attr': {'repo_id': repo_id, 'root_node': true},
+                'state': 'open'
+            };
+
+            var path_eles = cur_path.split('/');
+            path_eles.pop();
+            /* e.g.
+             * path: '/xx/'
+             * path_eles: ['', 'xx']
+             * data: [["xxx", "xx", "test1022"], ["lkjj", "kjhkhi"]]
+             * when no dir in '/', data will be [[]];
+             */
+            var len = data.length;
+            var children = [];
+            for (var i = len - 1; i > -1; i--) {
+                children[i] = [];
+                if (i == len - 1) {
+                    for (var j = 0, len_i = data[i].length; j < len_i; j++) {
+                        children[i].push({
+                            'data': data[i][j],
+                            'state': 'closed'
+                        });
+                    }
+                } else {
+                    for (var j = 0, len_i = data[i].length; j < len_i; j++) {
+                        if (data[i][j] == path_eles[i+1]) {
+                            children[i].push({
+                                'data': data[i][j],
+                                'state': 'open',
+                                'children': children[i+1]
+                            });
+                        } else {
+                            children[i].push({
+                                'data': data[i][j],
+                                'state': 'closed'
+                            });
+                        }
+                    }
+                }
+            }
+            if (children[0].length > 0) {
+                $.extend(repo_data, {'children': children[0]});
+            }
+            json_data.push(repo_data);
+
+            loading_tip.hide();
+            file_tree.renderDirTree(container, form, json_data);
+            container.removeClass('hide');
+        },
+        error: function() {
+            var cur_repo = [{
+                'data': repo_name,
+                'attr': {'repo_id': repo_id, 'root_node': true},
+                'state': 'closed'
+            }];
+            loading_tip.hide();
+            file_tree.renderDirTree(container, form, cur_repo);
+            container.removeClass('hide');
+        }
+    });
+}
+$('#mv-form').submit(function() {
+    var dirents = app.libdirents;
+    var form = $(this),
+        form_id = form.attr('id'),
+        post_url = '',
+        post_data = {},
+        path = dirents.path,
+        repo_id = dirents.repo_id,
+        after_op_success;
+
+        var dst_repo = $('[name="dst_repo"]', form).val(),
+            dst_path = $('[name="dst_path"]', form).val(),
+            op = $('[name="op"]', form).val(),
+            obj_name = $('[name="obj_name"]', form).val(),
+            obj_type = $('[name="obj_type"]', form).val(),
+            op_obj = form.data('op_obj');
+
+        if (!op_obj) { // for mv-dirents, cp-dirents
+            return false;
+        }
+
+        if (!$.trim(dst_repo) || !$.trim(dst_path)) {
+            $('.error', form).removeClass('hide');
+            return false;
+        }
+        if (dst_repo == repo_id && (dst_path == path || (obj_type == 'dir' && dst_path == path + obj_name + '/'))) {
+            $('.error', form).html("{% trans "Invalid destination path" %}").removeClass('hide');
+            return false;
+        }
+        post_url = '/ajax/repo/' + repo_id;
+        post_url += obj_type == 'dir' ? '/dir' : '/file';
+        post_url += op == 'mv' ? '/mv' : '/cp';
+        post_url += '/?path=' + e(path) + '&obj_name=' + e(obj_name);
+        post_data = {
+            'dst_repo': dst_repo,
+            'dst_path': dst_path
+        };
+        after_op_success = function(data) {
+            $.modal.close();
+            msg = data['msg'];
+            if (!data['task_id']) { // no progress
+                if (op=='mv') {
+                    op_obj.remove();
+                }
+                feedback(msg, 'success');
+            } else {
+                var details = $('#mv-details'),
+                    cancel_btn = $('#cancel-mv'),
+                    other_info = $('#mv-other-info');
+                cancel_btn.removeClass('hide');
+                setTimeout(function () {
+                    $('#mv-progress-popup').modal({containerCss: {
+                        width: 300,
+                        height: 150,
+                        paddingTop: 50
+                    }, focus:false});
+                    var det_text = op == 'mv' ? "{% trans "Moving %(name)s" %}": "{% trans "Copying %(name)s" %}";
+                    details.html(det_text.replace('%(name)s', trimFilename(obj_name, 20)));
+                    $('#mv-progress').progressbar();
+                    req_progress();
+                }, 100);
+                var req_progress = function () {
+                    $.ajax({
+                        url: '{% url "get_cp_progress" %}?task_id=' + e(data['task_id']),
+                        dataType: 'json',
+                        success: function(data) {
+                            var bar = $('.ui-progressbar-value', $('#mv-progress'));
+                            if (!data['failed'] && !data['canceled'] && !data['successful']) {
+                                if (data['done'] == data['total']) {
+                                    bar.css('width', '100%'); // 'done' and 'total' can be both 0
+                                    details.addClass('vh');
+                                    cancel_btn.addClass('hide');
+                                    other_info.html("{% trans "Saving..." %}").removeClass('hide');
+                                } else {
+                                    bar.css('width', parseInt(data['done']/data['total']*100, 10) + '%');
+                                }
+                                bar.show();
+                                setTimeout(req_progress, 1000);
+                            } else if (data['successful']) {
+                                $.modal.close();
+                                if (op=='mv') {
+                                    op_obj.remove();
+                                }
+                                feedback(msg, 'success');
+                            } else { // failed or canceled
+                                details.addClass('vh');
+                                var other_msg = data['failed'] ? "{% trans "Failed." %}" : "{% trans "Canceled." %}";
+                                other_info.html(other_msg).removeClass('hide');
+                                cancel_btn.addClass('hide');
+                                setTimeout(function () { $.modal.close(); }, 1000);
+                            }
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            var error;
+                            if (xhr.responseText) {
+                                error = $.parseJSON(xhr.responseText).error;
+                            } else {
+                                error = "{% trans "Failed. Please check the network." %}";
+                            }
+                            details.addClass('vh')
+                            other_info.html(error).removeClass('hide');
+                            cancel_btn.addClass('hide');
+                            setTimeout(function () { $.modal.close(); }, 1000);
+                        }
+                    });
+                };
+                cancel_btn.click(function() {
+                    disable(cancel_btn);
+                    $.ajax({
+                        url: '{% url "cancel_cp" %}?task_id=' + e(data['task_id']),
+                        dataType: 'json',
+                        success: function(data) {
+                            details.addClass('vh')
+                            other_info.html("{% trans "Canceled." %}").removeClass('hide');
+                            cancel_btn.addClass('hide');
+                            setTimeout(function () {$.modal.close();}, 1000);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            var error;
+                            if (xhr.responseText) {
+                                error = $.parseJSON(xhr.responseText).error;
+                            } else {
+                                error = "{% trans "Failed. Please check the network." %}";
+                            }
+                            other_info.html(error).removeClass('hide');
+                            enable(cancel_btn);
+                        }
+                    });
+                });
+            }
+        }
+
+    ajaxPost({
+        'form': form,
+        'post_url': post_url,
+        'post_data': post_data,
+        'after_op_success': after_op_success,
+        'form_id': form_id
+    });
+    return false;
+});
+$('#mv-dir-list .hd').click(function() {
+    var span = $('span', $(this)),
+        form = $('#mv-form'),
+        loading_tip = $(this).next(),
+        dir_tree_container = loading_tip.next().data('site_root', '{{SITE_ROOT}}'),
+        file_tree = new FileTree();
+    if (span.hasClass('icon-caret-right')) {
+        span.attr('class','icon-caret-down');
+        loading_tip.show();
+        if (dir_tree_container.attr('id') == 'current-repo-dirs') {
+            render_jstree_for_cur_path();
+        } else {
+            $.ajax({
+                url: '{% url 'unenc_rw_repos' %}',
+                cache: false,
+                dataType: 'json',
+                success: function(data) {
+                    var other_repos = [];
+                    var cur_repo_id = app.libdirents.repo_id;
+                    for (var i = 0, len = data.length; i < len; i++) {
+                        if (data[i].id != cur_repo_id) {
+                            other_repos.push({
+                                'data': data[i].name,
+                                'attr': {'repo_id': data[i].id, 'root_node': true},
+                                'state': 'closed'
+                            });
+                        }
+                    }
+                    loading_tip.hide();
+                    file_tree.renderDirTree(dir_tree_container, form, other_repos);
+                    dir_tree_container.removeClass('hide');
+                }
+            });
+        }
+    } else {
+        span.attr('class','icon-caret-right');
+        dir_tree_container.addClass('hide');
+    }
+});
 </script>
