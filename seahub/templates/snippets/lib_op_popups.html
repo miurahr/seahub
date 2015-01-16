@@ -70,3 +70,18 @@
         <button id="cancel-mv">{% trans "Cancel" %}</button>
     </div>
 
+    <div id="upload-file-dialog" class="hide">
+        <h3 class="hd"><span class="status">{% trans "File Upload" %}</span> <span class="total-progress hide"></span></h3>
+        <div class="ops">
+            <img src="{{MEDIA_URL}}img/minus.png" alt="" class="fold-switch cspt" />
+            <img src="{{MEDIA_URL}}img/close.png" alt="close" title="{% trans "close" %}" class="close cspt hide" />
+        </div>
+        <div class="con">
+            <div class="row fileupload-buttonbar">
+                <button type="button" class="cancel cspt fright">{% trans "Cancel All" %}</button>
+            </div>
+            <p class="saving-tip alc clear hide"><img src="{{MEDIA_URL}}img/loading-icon.gif" alt="" style="margin-right:5px;" class="vam" />{% trans "Saving..." %}</p>
+            <table class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+        </div>
+    </div>
+

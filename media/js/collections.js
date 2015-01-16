@@ -14,7 +14,6 @@
         parse: function (data) {
             this.repo_name = data.repo_name;
             this.user_perm = data.user_perm;
-            this.no_quota = data.no_quota;
             this.encrypted = data.encrypted;
 
             this.dirent_more = data.dirent_more;

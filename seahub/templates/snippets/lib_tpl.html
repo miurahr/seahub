@@ -16,9 +16,6 @@
 
 <script type="text/template" id="libop-template">
     <% if (user_perm == 'rw') { %>
-        <% if (no_quota) { %>
-    <button id="upload-file" class="op-btn">{% trans "Upload" %}</button>
-        <% } else { %>
     <div id="upload-file" class="op-btn upload-file-btn">
         <span>{% trans "Upload"%}</span>
         <input type="file" name="file" multiple />
@@ -35,7 +32,6 @@
         </li>
     </ul>
     {% endif %}
-        <% } %>
     <button id="add-new-dir" class="op-btn">{% trans "New Directory" %}</button>
     <button id="add-new-file" class="op-btn">{% trans "New File" %}</button>
     <% } %>

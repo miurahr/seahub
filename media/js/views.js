@@ -390,14 +390,47 @@
         },
         renderLibop: function () {
             var dirents = this.collection;
+            var user_perm = dirents.user_perm;
             $('.repo-file-list-topbar .repo-op').html($.trim(this.libop_template({
-                user_perm: dirents.user_perm,
-                no_quota: dirents.no_quota,
+                user_perm: user_perm,
                 encrypted: dirents.encrypted,
                 path: dirents.path,
                 share: dirents.share,
                 repo_id: dirents.repo_id
             })));
+            try { // for case: directly visit 'lib' by enter url in the location bar
+                if (!user_perm || user_perm != 'rw') {
+                    return;
+                }
+                var upload_popup = $('#upload-file-dialog');
+                var file_input = this.$('#upload-file input');
+                var upload_menu = this.$('#upload-menu');
+                upload_popup.fileupload('option', 'fileInput', file_input);
+                if (upload_menu.length > 0 && // folder upload enabled
+                   'webkitdirectory' in file_input[0]) {
+                    file_input.remove().end().addClass('cspt');
+                    this.$('#upload-file').click(function () {
+                        upload_menu.toggleClass('hide');
+                    });
+                    $('.item', upload_menu).click(function() {
+                        upload_popup.fileupload(
+                            'option',
+                            'fileInput',
+                            $('input[type="file"]', $(this))
+                        );
+                    })
+                    .hover(
+                        function() {
+                            $(this).css({'background':'#f3f3f3'});
+                        },
+                        function() {
+                            $(this).css({'background':'transparent'});
+                        }
+                    );
+                    this.$('.repo-op').css({'position': 'relative'});
+                }
+            } catch (e) {
+            }
         },
         addOne: function (dirent) {
             var dirents = this.collection;
@@ -490,11 +523,6 @@
             return false;
         },
         uploadFile: function () {
-/* todo
-            {% if no_quota %}
-            $('#upload-file-dialog').modal();
-            {% endif %}
-*/
         },
         newDir: function () {
             var form = $('#add-new-dir-form'),

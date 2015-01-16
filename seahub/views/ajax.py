@@ -441,11 +441,8 @@ def get_lib_dirents(request, repo_id):
     if dirent_more:
         more_start = offset + 100
 
-    no_quota = True if seaserv.check_quota(repo.id) < 0 else False
-
     result["repo_name"] = repo.name
     result["user_perm"] = user_perm
-    result["no_quota"] = no_quota
     result["encrypted"] = repo.encrypted
 
     result["dirent_more"] = dirent_more

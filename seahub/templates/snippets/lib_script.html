@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n upload_tags %}
 <script type="text/javascript">
 var no_file_op_popup = true;
 var popup_tr;
@@ -323,5 +323,339 @@ $('#mv-dir-list .hd').click(function() {
         span.attr('class','icon-caret-right');
         dir_tree_container.addClass('hide');
     }
+});
+</script>
+{% upload_js %}
+<script type="text/javascript">
+window.locale = {
+    "fileupload": {
+        "errors": {
+            "maxFileSize": "{% trans "File is too big" %}",
+            "minFileSize": "{% trans "File is too small" %}",
+            "acceptFileTypes": "{% trans "Filetype not allowed" %}",
+            "maxNumberOfFiles": "{% trans "Max number of files exceeded" %}",
+            "uploadedBytes": "{% trans "Uploaded bytes exceed file size" %}",
+            "emptyResult": "{% trans "Empty file upload result" %}"
+        },
+        "error": "{% trans "Error" %}",
+        "uploaded": "{% trans "uploaded" %}",
+        "canceled": "{% trans "canceled" %}",
+        "start": "{% trans "Start" %}",
+        "cancel": "{% trans "Cancel" %}",
+        "destroy": "{% trans "Delete" %}"
+    }
+};
+$(function() {
+    $.getScript('{{ MEDIA_URL }}js/jquery.fileupload.min.js', function () {
+        var dirents = app.libdirents;
+        var libview = app.libview;
+
+        var popup = $('#upload-file-dialog').addClass('fixed-upload-file-dialog');;
+        var popup_height = '200px';
+        popup.css({'height': popup_height}).data('height', popup_height);
+
+        var fu_status = $('.status', popup),
+            total_progress = $('.total-progress', popup),
+            cancel_all_btn = $('.fileupload-buttonbar .cancel', popup),
+            close_icon = $('.close', popup),
+            saving_tip = $('.saving-tip', popup);
+
+        var fu_status_ = {
+            'uploading': "{% trans "File Uploading..." %}",
+            'complete': "{% trans "File Upload complete" %}",
+            'canceled': "{% trans "File Upload canceled" %}",
+            'failed': "{% trans "File Upload failed" %}"
+        };
+
+        var uploaded_files = [];
+        {% if enable_upload_folder %}
+        var new_dir_names = [];
+        var dirs_to_update = [];
+        {% endif %}
+
+        var file_input;
+        if (dirents.user_perm && dirents.user_perm == 'rw') {
+            file_input = libview.$('#upload-file input');
+        }
+        popup.fileupload({
+            fileInput: file_input, // initialize
+            paramName: 'file',
+            // customize it for 'done'
+            getFilesFromResponse: function (data) {
+                if (data.result) {
+                    return data.result;
+                }
+            },
+            autoUpload:true,
+            {% if max_upload_file_size %}
+            maxFileSize: {{ max_upload_file_size }}, // in bytes
+            {% endif %}
+            maxNumberOfFiles: 500,
+            sequentialUploads: true
+        })
+        .bind('fileuploadadd', function(e, data) {
+            // for drag & drop
+            if (!$('#repo-file-list').is(':visible')) {
+                return false;
+            }
+            if (dirents.user_perm && dirents.user_perm != 'rw') {
+                return false;
+            }
+
+            popup.removeClass('hide');
+            cancel_all_btn.removeClass('hide');
+            close_icon.addClass('hide');
+
+            var path = dirents.path;
+            popup.fileupload('option', 'formData', {
+                'parent_dir': path == '/' ? path : path + '/'
+            });
+
+            {% if enable_upload_folder %}
+            // hide the upload menu
+            var menu = libview.$('#upload-menu');
+            if (!menu.hasClass('hide')) {
+                menu.find('.item').removeAttr('style')
+            .end().addClass('hide');
+            }
+
+            // when add folder, a subdirectory will be shown as '.'. rm it.
+            var file = data.files[0];
+            if (file.name == '.') {
+                data.files.shift();
+            }
+            if (file.webkitRelativePath) { // for 'upload folder'
+                file.relative_path = file.webkitRelativePath;
+            }
+            if (file.relativePath) { // for 'folder drag & drop'
+                file.relative_path = file.relativePath + file.name;
+            }
+            {% endif %}
+        })
+        .bind('fileuploadstart', function() {
+            fu_status.html(fu_status_.uploading);
+        })
+        .bind('fileuploadsubmit', function(e, data) {
+            var _this = $(this);
+            var file = data.files[0];
+            // get url(token) for every file
+            if (!file.error) {
+                $.ajax({
+                    url: '/ajax/repo/' + dirents.repo_id + '/file_op_url/?op_type=upload',
+                    cache: false,
+                    dataType: 'json',
+                    success: function(ret) {
+                        {% if enable_upload_folder %}
+                        var file_path = file.relative_path,
+                            r_path;
+                        if (file_path) { // 'add folder'
+                            r_path = file_path.substring(0, file_path.lastIndexOf('/') + 1);
+                        }
+                        var formData = popup.fileupload('option', 'formData');
+                        formData.relative_path = r_path || '';
+                        popup.fileupload('option', 'formData', formData);
+                        {% endif %}
+
+                        data.url = ret['url'];
+                        data.jqXHR = _this.fileupload('send', data);
+                    },
+                    error: function() {
+                        file.error = "{% trans "Failed to get upload url" %}";
+                    }
+                });
+                return false;
+            }
+        })
+        .bind('fileuploadprogressall', function (e, data) {
+            total_progress.html(parseInt(data.loaded / data.total * 100, 10) + '% ' + '<span style="font-size:14px;color:#555;">(' + $(this).data('blueimp-fileupload')._formatBitrate(data.bitrate) + ')</span>').removeClass('hide');
+            if (data.loaded > 0 && data.loaded == data.total) {
+                saving_tip.show();
+            }
+        })
+        .bind('fileuploaddone', function(e, data) {
+            if (data.textStatus != 'success') {
+                return;
+            }
+            var file = data.files[0];
+            var file_path = file.relative_path;
+            var file_uploaded = data.result[0]; // 'id', 'name', 'size'
+
+            // for 'template_download' render
+            file_uploaded.uploaded = true;
+            if (file_path) {
+                file_uploaded.relative_path = file_path.substring(0, file_path.lastIndexOf('/') + 1) + file_uploaded.name;
+            }
+
+            var path = dirents.path;
+            path = path == '/' ? path : path + '/';
+            if (data.formData.parent_dir != path) {
+                return;
+            }
+            if (!file_path) {
+                uploaded_files.push(file_uploaded);
+                return;
+            }
+            {% if enable_upload_folder %}
+            // for 'add folder'
+            var dir_name = file_path.substring(0, file_path.indexOf('/'));
+            var dir = dirents.where({'is_dir': true, 'obj_name': dir_name});
+            if (dir.length > 0) { // 0 or 1
+                if (dirs_to_update.indexOf(dir_name) == -1) {
+                    dirs_to_update.push(dir_name);
+                }
+            } else {
+                if (new_dir_names.indexOf(dir_name) == -1) {
+                    new_dir_names.push(dir_name);
+                }
+            }
+            {% endif %}
+        })
+        .bind('fileuploadstop', function () {
+            cancel_all_btn.addClass('hide');
+            close_icon.removeClass('hide');
+
+            var path = dirents.path;
+            path = path == '/' ? path : path + '/';
+            if (popup.fileupload('option','formData').parent_dir != path) {
+                return;
+            }
+            var now = parseInt(new Date().getTime()/1000);
+            if (uploaded_files.length > 0) {
+                var dirs = dirents.where({'is_dir':true});
+                var last_dir = $($('.repo-file-list tr')[dirs.length]);
+                $(uploaded_files).each(function(index, file) {
+                    var new_dirent = dirents.add({
+                        'is_file': true,
+                        'obj_name': file.name,
+                        'last_modified': now,
+                        'file_size': filesizeformat(file.size, 1),
+                        'obj_id': file.id,
+                        'file_icon': 'file.png',
+                        'last_update': "{% trans "Just now" %}",
+                        'starred': false,
+                        'sharelink': '',
+                        'sharetoken': ''
+                    }, {silent: true});
+                    var view = new app.views.DirentView({model: new_dirent, collection: dirents});
+                    last_dir.after(view.render().el);
+                });
+                uploaded_files = [];
+            }
+            if (new_dir_names.length > 0) {
+                $(new_dir_names).each(function(index, new_name) {
+                    var new_dirent = dirents.add({
+                        'is_dir': true,
+                        'obj_name': new_name,
+                        'last_modified': now,
+                        'last_update': "{% trans "Just now" %}",
+                        'p_dpath': path + new_name,
+                        'sharelink': '',
+                        'sharetoken': '',
+                        'uploadlink': '',
+                        'uploadtoken': ''
+                    }, {silent: true});
+                    var view = new app.views.DirentView({model: new_dirent, collection: dirents});
+                    $('.repo-file-list tr:first').after(view.render().el);
+                });
+                new_dir_names = [];
+            }
+            if (dirs_to_update.length > 0) {
+                $(dirs_to_update).each(function(index, dir_name) {
+                    var dir = dirents.where({'is_dir':true, 'obj_name':dir_name});
+                    dir[0].set({
+                        'last_modified': now,
+                        'last_update': "{% trans "Just now" %}"
+                    });
+                });
+                dirs_to_update = [];
+            }
+        })
+        // after tpl has rendered
+        .bind('fileuploadcompleted', function() { // 'done'
+            if ($('.files .cancel', popup).length == 0) {
+                saving_tip.hide();
+                total_progress.addClass('hide');
+                fu_status.html(fu_status_.complete);
+            }
+        })
+        .bind('fileuploadfailed', function(e, data) { // 'fail'
+            if ($('.files .cancel', popup).length == 0) {
+                cancel_all_btn.addClass('hide');
+                close_icon.removeClass('hide');
+                total_progress.addClass('hide');
+                saving_tip.hide();
+                if (data.errorThrown == 'abort') { // 'cancel'
+                    fu_status.html(fu_status_.canceled);
+                } else { // 'error'
+                    fu_status.html(fu_status_.failed);
+                }
+            }
+        });
+
+        // Enable iframe cross-domain access via redirect option:
+        popup.fileupload(
+            'option',
+            'redirect',
+            window.location.href.replace(/\/repo\/[-a-z0-9]{36}\/.*/, '{{MEDIA_URL}}cors/result.html?%s')
+        );
+
+        {% if enable_upload_folder %}
+        var upload_btn = libview.$('#upload-file'),
+            upload_menu = libview.$('#upload-menu');
+        if (dirents.user_perm && dirents.user_perm == 'rw' &&
+                'webkitdirectory' in $('input[type="file"]', upload_btn)[0]) {
+            upload_btn.find('input').remove().end().addClass('cspt');
+            $('.item', upload_menu).click(function() {
+                popup.fileupload(
+                    'option',
+                    'fileInput',
+                    $('input[type="file"]', $(this))
+                );
+            })
+            .hover(
+                function() {
+                    $(this).css({'background':'#f3f3f3'});
+                },
+                function() {
+                    $(this).css({'background':'transparent'});
+                }
+            );
+            libview.$('.repo-op').css({'position': 'relative'});
+            upload_btn.click(function () {
+                upload_menu.toggleClass('hide');
+            });
+        }
+        {% endif %}
+    });
+});
+
+$(document).click(function(e) {
+    var target = e.target || event.srcElement;
+    var closePopup = function(popup, popup_switch) {
+        if (!popup.hasClass('hide') && !popup.is(target) && !popup.find('*').is(target) && !popup_switch.is(target) && !popup_switch.find('*').is(target) ) {
+            popup.addClass('hide');
+        }
+    };
+    var libview = app.libview;
+    closePopup(libview.$('#upload-menu'), libview.$('#upload-file'));
+});
+
+
+// fold/unfold the dialog
+$('#upload-file-dialog .fold-switch').click(function() {
+    var popup = $('#upload-file-dialog');
+    var full_ht = parseInt(popup.data('height'));
+    var main_con = $('.fileupload-buttonbar, .table', popup);
+    if (popup.height() == full_ht) {
+        popup.height($('.hd', popup).outerHeight(true));
+        main_con.addClass('hide');
+    } else {
+        popup.height(full_ht);
+        main_con.removeClass('hide');
+    }
+});
+$('#upload-file-dialog .close').click(function() {
+    $('#upload-file-dialog').addClass('hide');
+    $('#upload-file-dialog .files').empty();
 });
 </script>
