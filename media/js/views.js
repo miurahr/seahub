@@ -283,7 +283,8 @@
             var file_name = this.model.get('obj_name');
             var form = $('#update-file-form');
             var saving_tip = $('.saving-tip', form);
-            var cur_path = this.collection.path;
+            var col = this.collection;
+            var cur_path = col.path;
             var upload_success = false;
             var updated_file;
             var this_model = this.model;
@@ -306,11 +307,12 @@
             });
             $('.simplemodal-wrap').css({'overflow':'auto'}); // for ie
 
+            cur_path += cur_path == '/' ? '' : '/';
             $('input[name="target_file"]', form).val(cur_path + file_name);
             var hd = $('#update-file-dialog .hd');
             hd.html(hd.html().replace('%(file_name)s', '<span class="op-target">' + file_name + '</span>'));
             $.ajax({
-                url: app.pages.lib.config.urls.get_file_op_url + '?op_type=update',
+                url: '/ajax/repo/' + col.repo_id + '/file_op_url/?op_type=update',
                 cache: false,
                 dataType: 'json',
                 success: function(data) {
@@ -324,7 +326,6 @@
                             }
                         },
 /* todo
-
                         {% if max_upload_file_size %}
                         maxFileSize: {{max_upload_file_size}}, // in bytes
                         {% endif %}
