@@ -42,7 +42,7 @@
 {% include "snippets/my_owned_repos.html" %}
 
 {% url 'share_repo' as repo_share_url %}
-{% with post_url=repo_share_url %}
+{% with post_url=repo_share_url form_id='repo-share-form' %}
 {% include "snippets/repo_share_form.html" %}
 {% endwith %}
 
@@ -78,7 +78,7 @@
 {% endif %}
 
 {% include 'snippets/lib_wrap.html' %}
-{% include "snippets/lib_op_popups.html" %} {# include rename #}
+{% include "snippets/lib_op_popups.html" %}
 {% endblock %}
 
 {% block extra_script %}{{block.super}}

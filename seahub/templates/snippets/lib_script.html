@@ -658,4 +658,10 @@ $('#upload-file-dialog .close').click(function() {
     $('#upload-file-dialog').addClass('hide');
     $('#upload-file-dialog .files').empty();
 });
+
+$(function() {
+    // for file private share
+    $.getScript('{{ MEDIA_URL }}js/select2.min.js');
+});
+{% include "snippets/shared_link_js.html" %}
 </script>

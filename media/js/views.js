@@ -141,6 +141,7 @@
                 name = this.model.get('obj_name');
             var col = this.collection;
             var cur_path = col.path;
+            cur_path += cur_path == '/' ? '' : '/';
             var repo_id = col.repo_id;
             var ajax_urls = {
                 'link': app.urls.get_shared_link + '?repo_id=' + e(repo_id) + '&p=' + e(cur_path + name),
@@ -150,6 +151,11 @@
             if (type == 'd') {
                 ajax_urls['link'] += '&type=d';
             }
+            op.data('repo', {
+                'is_repo_owner': col.is_repo_owner,
+                'is_virtual': col.is_virtual,
+                'user_perm': col.user_perm,
+                'repo_id': col.repo_id});
             showSharePopup(op, name, ajax_urls, type, cur_path);
             return false;
         },
@@ -618,13 +624,19 @@
         share: function () {
             var op = this.$('#share-cur-dir'),
                 name, aj_urls, type;
-            var cur_path = this.collection.path;
+            var col = this.collection;
+            var cur_path = col.path;
             name = cur_path.substr(cur_path.lastIndexOf('/') + 1);
             aj_urls = {
                 'link': op.data('url'),
                 'upload-link': op.data('upload-url')
             };
             type = 'd';
+            op.data('repo', {
+                'is_repo_owner': col.is_repo_owner,
+                'is_virtual': col.is_virtual,
+                'user_perm': col.user_perm,
+                'repo_id': col.repo_id});
             showSharePopup(op, name, aj_urls, type, cur_path);
         },
         select: function () {

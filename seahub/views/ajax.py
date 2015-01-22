@@ -441,6 +441,13 @@ def get_lib_dirents(request, repo_id):
     if dirent_more:
         more_start = offset + 100
 
+    if is_org_context(request):
+        repo_owner = seafile_api.get_org_repo_owner(repo.id)
+    else:
+        repo_owner = seafile_api.get_repo_owner(repo.id)
+    result["is_repo_owner"] = True if repo_owner == username else False
+
+    result["is_virtual"] = repo.is_virtual
     result["repo_name"] = repo.name
     result["user_perm"] = user_perm
     result["encrypted"] = repo.encrypted

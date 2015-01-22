@@ -31,6 +31,7 @@ from seaserv import seafile_api
 from pysearpc import SearpcError
 
 from seahub.avatar.util import get_avatar_file_storage
+from seahub.avatar.templatetags.group_avatar_tags import grp_avatar
 from seahub.auth.decorators import login_required, login_required_ajax
 from seahub.auth import login as auth_login
 from seahub.auth import get_backends
@@ -1048,6 +1049,9 @@ def myhome(request):
     repo_create_url = reverse("repo_create")
 
     max_upload_file_size = get_max_upload_file_size()
+
+    for g in request.user.joined_groups:
+        g.avatar = grp_avatar(g.id, 20)
 
     return render_to_response('myhome.html', {
             "owned_repos": owned_repos,

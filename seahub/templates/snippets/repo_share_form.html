@@ -1,13 +1,13 @@
 {% load i18n %}
-<form id="repo-share-form" action="{{ post_url }}" method="post" name="repo-share-form" class="tab-popup hide">{% csrf_token %}
+<form id="{{form_id}}" action="{{ post_url }}" method="post" name="repo-share-form" class="tab-popup hide">{% csrf_token %}
     <h3 class="hd">{% trans "Share %(lib_name)s" %}</h3>
-    <div id="repo-share-tabs" class="tab-popup-tabs">
+    <div class="tab-popup-tabs">
         <ul class="tab-popup-tabs-nav">
-            <li id="share-enter-tab" class="tab"><a href="#share-enter" class="a">{% trans 'Enter' %}</a></li>
-            <li class="tab"><a href="#share-grp-options" class="a">{% trans 'Groups' %}</a></li>
-            <li class="tab"><a href="#share-contact-options" class="a">{% trans 'Contacts' %}</a></li>
+            <li id="share-enter-tab" class="tab"><a href="#{{form_id}}-share-enter" class="a">{% trans 'Enter' %}</a></li>
+            <li class="tab"><a href="#{{form_id}}-share-grp-options" class="a">{% trans 'Groups' %}</a></li>
+            <li class="tab"><a href="#{{form_id}}-share-contact-options" class="a">{% trans 'Contacts' %}</a></li>
         </ul>
-        <div id="share-enter">
+        <div id="{{form_id}}-share-enter">
             <textarea id="email_or_group" name="email_or_group" placeholder="{% trans "Emails or Groups, Seperated by ','"%}"></textarea>
             {% if cloud_mode %}
             {% if org %}
@@ -17,8 +17,8 @@
             <p class="tip">{% trans 'Tip: enter "all" to share to public library.' %}</p>
             {% endif %}
         </div>
-        <div id="share-grp-options" class="hide"></div>
-        <div id="share-contact-options" class="hide"></div>
+        <div id="{{form_id}}-share-grp-options" class="hide"></div>
+        <div id="{{form_id}}-share-contact-options" class="hide"></div>
     </div>
     <div class="bot">
         <select name="permission" class="share-permission-select w100">

@@ -1,18 +1,19 @@
 {% load i18n %}
 {% load url from future %}
 
-var share_list = [], contacts = [];
+var link_share_list = [],
+    contacts = [];
 $(function () {
     $.ajax({
         url:'{% url 'get_contacts' %}',
         cache: false,
         dataType: 'json',
         success: function(data) {
-            var contact_list = data['contacts'], contact_email;
-            for (var i = 0, len = contact_list.length; i < len; i++) {
-                contact_email = contact_list[i].email;
-                share_list.push({value: contact_email, label: contact_email});
-                contacts.push({value:contact_email, avatar:contact_list[i].avatar});
+            contacts = data['contacts'];
+            var contact_email;
+            for (var i = 0, len = contacts.length; i < len; i++) {
+                contact_email = contacts[i].email;
+                link_share_list.push({value: contact_email, label: contact_email});
             }
         }
     });
@@ -21,15 +22,23 @@ $(function () {
 function showSharePopup(op, name, aj_urls, type, cur_path) {
     var path;
     if (op.attr('id') == 'share-cur-dir') {
-        path = cur_path.substr(0, cur_path.length - 1); // rm the last '/' as seafile_api treats '/xx' and '/xx/' as different
+        //path = cur_path.substr(0, cur_path.length - 1); // rm the last '/' as seafile_api treats '/xx' and '/xx/' as different
+        path = cur_path;
     } else {
         path = cur_path + name;
     }
 
     var form = $('#file-share');
 
-    {% if ENABLE_SUB_LIBRARY and not repo.is_virtual and is_repo_owner %}
-    var grp_options_ct = $('#share-grp-options');
+    var repo_data = op.data('repo');
+    var is_repo_owner = repo_data.is_repo_owner;
+    var repo_is_virtual = repo_data.is_virtual;
+    var user_perm = repo_data.user_perm;
+    var repo_id = repo_data.repo_id;
+
+    {% if ENABLE_SUB_LIBRARY %}
+    if (!repo_is_virtual && is_repo_owner) {
+    var grp_options_ct = $('#sub-lib-share-form-share-grp-options');
     if (!$.trim(grp_options_ct.html())) {
         var grp_options = '<ul class="option-list">';
         {% for group in request.user.joined_groups %}
@@ -38,31 +47,43 @@ function showSharePopup(op, name, aj_urls, type, cur_path) {
         grp_options += '</ul>';
         grp_options_ct.html(grp_options);
     }
-    var contact_options_ct = $('#share-contact-options');
+    var contact_options_ct = $('#sub-lib-share-form-share-contact-options');
     if (!$.trim(contact_options_ct.html())) {
         var contact_options = '<ul class="option-list">';
         for (var i = 0, len = contacts.length; i < len; i++) {
-            contact_email = contacts[i].value;
+            contact_email = contacts[i].email;
             contact_options += ' <li> <label class="checkbox-label"> <span class="checkbox"><input type="checkbox" name="contact" value="' + contact_email + '" class="checkbox-orig" /></span>' + contacts[i].avatar + ' <span class="checkbox-option">' + contact_email + '</span> </label> </li>';
         }
         contact_options += '</ul>';
         contact_options_ct.html(contact_options);
     }
-
-    $('.checkbox-orig', $('#share-grp-options, #share-contact-options')).click(function() {
-        $(this).parent().toggleClass('checkbox-checked');
-    });
-    $(".checkbox-label", $('#share-grp-options, #share-contact-options')).hover(
-        function() {
-            $(this).addClass('hl');
-        },
-        function() {
-            $(this).removeClass('hl');
-        }
-    );
+    }
     {% endif %}
 
     form.modal({appendTo: "#main",'focus':false, containerCss:{"padding":0}});
+
+    if (user_perm == 'rw') {
+        $('#upload-link-share-tab, #upload-link-share').removeClass('hide');
+    }
+    if (is_repo_owner) {
+        $('#private-share-tab, #private-share').removeClass('hide');
+    }
+    {% if ENABLE_SUB_LIBRARY %}
+    if (!repo_is_virtual && is_repo_owner) {
+        $('#syncable-share-tab, #syncable-share').removeClass('hide');
+        $('.checkbox-orig', $('#sub-lib-share-form-share-grp-options, #sub-lib-share-form-share-contact-options')).click(function() {
+            $(this).parent().toggleClass('checkbox-checked');
+        });
+        $(".checkbox-label", $('#sub-lib-share-form-share-grp-options, #sub-lib-share-form-share-contact-options')).hover(
+            function() {
+                $(this).addClass('hl');
+            },
+            function() {
+                $(this).removeClass('hl');
+            }
+        );
+    }
+    {% endif %}
 
     var hd = $('#file-share .hd');
     hd.html(hd.html().replace('%(name)s', '<span class="op-target">' + trimFilename(name, 30) + '</span>'));
@@ -92,7 +113,6 @@ function showSharePopup(op, name, aj_urls, type, cur_path) {
     $('input[name="file_shared_name"]').val(name);
     $('input[name="file_shared_type"]').val(type);
 
-    {% if user_perm == 'rw' %}
     // share upload link
     $('#upload-link-share-tab .a').click(function() {
         if (op.attr('data-upload-link')) {
@@ -110,17 +130,17 @@ function showSharePopup(op, name, aj_urls, type, cur_path) {
         $('#gen-upload-link-btn').data('url', aj_urls['upload-link']).data('obj', op);
         $('#rm-shared-upload-link').data('obj', op);
     });
-    {% endif %}
 
     // 'private share' for file
     $('#private-share-tab a').click(function() {
         var form = $('#private-share-form');
+        form.attr('action', '/repo/' + repo_id + '/privshare/');
         $("input[name=s_type]", form).val(type);
         $("input[name=path]", form).val(path);
 
         var opts = '', email, avatar;
         for (var i = 0, len = contacts.length; i < len; i++) {
-            email = contacts[i].value;
+            email = contacts[i].email;
             opts += '<option value="' + email + '" data-index="' + i + '">' + email + '</option>';
         }
         var format = function(item) {
@@ -134,19 +154,63 @@ function showSharePopup(op, name, aj_urls, type, cur_path) {
         });
     });
 
-    {% if ENABLE_SUB_LIBRARY and not repo.is_virtual and is_repo_owner %}
     // syncable share for dir
     $('#syncable-share-tab a').click(function() {
-        var form = $("#repo-share-form");
+        var form = $("#sub-lib-share-form");
         form.removeClass('hide').css({'width':'auto', 'padding-top':0});
         $("h3", form).remove();
         $('.checkbox-label', form).css({'margin-right':'3px'}); // make it not show on top of the scrollbar when hover
         form.data('dir-path', path).attr('data-name', name);
-        $("#repo-share-tabs").tabs();
-        $('#repo-share-tabs .ui-tabs-nav').css({'padding-left': '1.4em'});
+        $(".tab-popup-tabs", form).tabs()
+        $('.ui-tabs-nav', form).css({'padding-left': '1.4em'});
     });
-    {% endif %}
 
+    {% if ENABLE_SUB_LIBRARY %}
+    if (!repo_is_virtual) {
+    // private share dir submit
+    // only share to 1 panel(e.g. enter, groups or contacts)
+       $('#sub-lib-share-form [type="submit"]').click(function() {
+            var form = $("#sub-lib-share-form"),
+                cur_tab_id = $('.ui-tabs-selected a', form).attr('href'),
+                post_data = '',
+                input = $('[name="email_or_group"]', form);
+            switch(cur_tab_id) {
+                case '#sub-lib-share-form-share-enter':
+                    post_data = input.val();
+                    break;
+                case '#sub-lib-share-form-share-grp-options':
+                case '#sub-lib-share-form-share-contact-options':
+                    $(cur_tab_id + ' .checkbox-checked .checkbox-orig').each(function() {
+                        post_data += $(this).val() + ',';
+                    });
+                    input.val(post_data);
+            }
+            if (!post_data) {
+                apply_form_error(form.attr('id'), "{% trans "Please enter emails or groups, or select some." %}");
+                return false;
+            }
+            // check if a sub-lib exists, if not, create one
+            $.ajax({
+                url: '{{SITE_ROOT}}ajax/repo/' + repo_id + '/dir/sub_repo/?p=' + e(form.data('dir-path')), dataType: 'json',
+                success: function(data) {
+                    $('[name="repo_id"]', form).val(data['sub_repo_id']);
+                    form.submit();
+                    disable($(this));
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    var err;
+                    if (xhr.responseText) {
+                        err = jQuery.parseJSON(xhr.responseText).error;
+                    } else {
+                        err = "{% trans "Failed. Please check the network." %}";
+                    }
+                    apply_form_error(form.attr('id'), err);
+                }
+            });
+            return false;
+        });
+    }
+    {% endif %}
     $('#simplemodal-container').css({'height':'auto', 'width':'auto'});
 }
 
@@ -158,7 +222,7 @@ $('#send-link').click(function() {
     var text = $('#download-extra-msg-text');
     text.css({'width': $('#link-share').width() - parseInt(text.css('padding-left')) - parseInt(text.css('padding-right')) - parseInt(text.css('border-left-width')) - parseInt(text.css('border-right-width'))});
     $('#link-send-form').removeClass('hide');
-    addAutocomplete('#link-send-input', '#link-send-form', share_list);
+    addAutocomplete('#link-send-input', '#link-send-form', link_share_list);
 });
 
 $("#link-send-form .cancel").click(function() {
@@ -319,7 +383,6 @@ $('#rm-shared-link').click(function() {
     });
 });
 
-{% if user_perm == 'rw' %}
 $('#shared-upload-link-text').click(function() {
     $(this).select();
 });
@@ -332,7 +395,7 @@ $('#send-upload-link').click(function() {
     var text = $('#upload-extra-msg-text');
     text.css({'width': $('#upload-link-share').width() - parseInt(text.css('padding-left')) - parseInt(text.css('padding-right')) - parseInt(text.css('border-left-width')) - parseInt(text.css('border-right-width'))});
     $('#upload-link-send-form').removeClass('hide');
-    addAutocomplete('#upload-link-send-input', '#upload-link-send-form', share_list);
+    addAutocomplete('#upload-link-send-input', '#upload-link-send-form', link_share_list);
 });
 
 $("#upload-link-send-form .cancel").click(function() {
@@ -485,7 +548,6 @@ $('#upload-link-passwd-switch').click(function () {
         pwd_input.attr('disabled', true).addClass('input-disabled');
     }
 });
-{% endif %}
 
 $('#link-passwd-switch').click(function () {
     var form = $('#link-options'),
@@ -514,3 +576,5 @@ $('#link-expire-switch').click(function () {
         days_input.attr('disabled', true).addClass('input-disabled');
     }
 });
+
+

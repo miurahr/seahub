@@ -1,38 +1,23 @@
-{% load seahub_tags group_avatar_tags i18n %}
-$(function () {
-    $.ajax({
-        url:'{% url 'get_contacts' %}',
-        cache: false,
-        dataType: 'json',
-        success: function(data) {
-            var share_list = [];
-            var contacts = data['contacts'], contact_email, group_name, group_name_py;   
-            for (var i = 0, len = contacts.length; i < len; i++) {
-                contact_email = contacts[i].email;
-                share_list.push({value:contact_email, label:contact_email});
-            }
-            {% for group in request.user.joined_groups %}
-            group_name = '{{ group.group_name }}';
-            group_name_py = '{{ group.group_name|char2pinyin }}'
-            share_list.push({value:group_name + group_name_py, label:group_name});
-            {% endfor %}
-
+{% load seahub_tags i18n %}
+// 'contacts' is in 'shared_link_js.html'
             $(".repo-share-btn").click(function() {
                 var form = $("#repo-share-form"),
                     hd = $('.hd', form),
                     btn_ct = $(this).parents('td'),
                     repo_id = btn_ct.data('id'),
                     repo_name = btn_ct.attr('data-name');
-                var grp_options_ct = $('#share-grp-options');
+
+                var contact_email;
+                var grp_options_ct = $('#repo-share-form-share-grp-options');
                 if (!$.trim(grp_options_ct.html())) {
                     var grp_options = '<ul class="option-list">';
                     {% for group in request.user.joined_groups %}
-                    grp_options += '<li> <label class="checkbox-label"> <span class="checkbox"><input type="checkbox" name="grp" value="{{ group.group_name }}" class="checkbox-orig"/></span> {% grp_avatar group.id 20 %} <span class="checkbox-option">{{ group.group_name }}</span> </label> </li>';
+                    grp_options += '<li> <label class="checkbox-label"> <span class="checkbox"><input type="checkbox" name="grp" value="{{ group.group_name }}" class="checkbox-orig"/></span> {{ group.avatar|safe }} <span class="checkbox-option">{{ group.group_name }}</span> </label> </li>';
                     {% endfor %}
                     grp_options += '</ul>';
                     grp_options_ct.html(grp_options);
                 }
-                var contact_options_ct = $('#share-contact-options');
+                var contact_options_ct = $('#repo-share-form-share-contact-options');
                 if (!$.trim(contact_options_ct.html())) {
                     var contact_options = '<ul class="option-list">';
                     for (var i = 0, len = contacts.length; i < len; i++) {
@@ -57,26 +42,36 @@ $(function () {
                 form.modal({appendTo: "#main", focus:false, containerCss:{"padding": 0}});
                 $('[name="repo_id"]', form).val(repo_id);
                 hd.html(hd.html().replace('%(lib_name)s', '<span class="op-target">' + repo_name + '</span>'));
-                $('#repo-share-tabs').tabs();
+                $('.tab-popup-tabs', form).tabs();
                 $('#simplemodal-container').css('height', 'auto');
+
+                var share_list = [];
+                var group_name, group_name_py;
+                for (var i = 0, len = contacts.length; i < len; i++) {
+                    contact_email = contacts[i].email;
+                    share_list.push({value:contact_email, label:contact_email});
+                }
+                {% for group in request.user.joined_groups %}
+                group_name = '{{ group.group_name }}';
+                group_name_py = '{{ group.group_name|char2pinyin }}'
+                share_list.push({value:group_name + group_name_py, label:group_name});
+                {% endfor %}
+
                 addAutocomplete('#email_or_group', '#repo-share-form', share_list);
             });
-        }
-    });
-});
 
     //check before post
-    $('#share-submit-btn').click(function() {
+    $('#repo-share-form [type="submit"]').click(function() {
         var form = $("#repo-share-form"),
             cur_tab_id = $('.ui-tabs-selected a', form).attr('href'),
             post_data = '',
             input = $('[name="email_or_group"]', form);
         switch(cur_tab_id) {
-            case '#share-enter':
+            case '#repo-share-form-share-enter':
                 post_data = input.val();
                 break;
-            case '#share-grp-options':
-            case '#share-contact-options':
+            case '#repo-share-form-share-grp-options':
+            case '#repo-share-form-share-contact-options':
                 $(cur_tab_id + ' .checkbox-checked .checkbox-orig').each(function() {
                     post_data += $(this).val() + ',';
                 });

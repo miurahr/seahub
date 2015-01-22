@@ -161,6 +161,11 @@ $('#share').click(function() {
         aj_urls = { 'link': '{% url 'get_shared_link' %}?repo_id={{ repo.id }}&p=' + e(path) },
         type = 'f',
         cur_path = path.substr(0, path.length - name.length);
+        op.data('repo', {
+            'is_repo_owner': {% if is_repo_owner %} true {% else %} false {% endif %},
+            'is_virtual': {% if repo.is_virtual %} true {% else %} false {% endif %},
+            'user_perm': '{{user_perm}}',
+            'repo_id': '{{repo.id}}'});
     showSharePopup(op, name, aj_urls, type, cur_path);
     return false;
 });

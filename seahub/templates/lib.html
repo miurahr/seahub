@@ -101,7 +101,6 @@
         {% endif %}
     </div>
 
-    {% include "snippets/file_share_popup.html" %} {# dir/file share popup, need ENABLE_SUB_LIBRARY #}
     {% include "snippets/lib_op_popups.html" %}
 {% endblock %}
 
@@ -115,11 +114,6 @@ function setDirentsOpPos() {
         'top': $(window).height()/2
     });
 }
-$(function() {
-    // for file private share
-    $.getScript('{{ MEDIA_URL }}js/select2.min.js');
-});
-{% include "snippets/shared_link_js.html" %}
 </script>
 {% endblock %}
 {% block app_page_script %}
