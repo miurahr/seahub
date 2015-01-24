@@ -117,32 +117,5 @@ function setDirentsOpPos() {
 </script>
 {% endblock %}
 {% block app_page_script %}
-<script type="text/javascript">
-app.pages.lib = {
-    config: {
-        repo_id: '{{repo.id}}',
-        urls: {
-            delete_dirents: '{% url 'delete_dirents' repo.id %}',
-            get_file_op_url: '{% url 'get_file_op_url' repo.id %}',
-            mv_dirents: '{% url 'mv_dirents' repo.id %}',
-            cp_dirents: '{% url 'cp_dirents' repo.id %}',
-            mv_dir: '{% url 'mv_dir' repo.id %}',
-            mv_file: '{% url 'mv_file' repo.id %}',
-            cp_dir: '{% url 'cp_dir' repo.id %}',
-            cp_file: '{% url 'cp_file' repo.id %}',
-            get_cp_progress: '{% url "get_cp_progress" %}',
-            cancel_cp: '{% url "cancel_cp" %}'
-        },
-        msgs: {
-            successDel: "{% trans "Successfully deleted %(name)s" %}",
-            renameDir: "{% trans "Rename Directory" %}",
-            renameFile: "{% trans "Rename File" %}",
-            required: "{% trans "It is required." %}",
-            notRenamed: "{% trans "You have not renamed it." %}",
-            justNow: "{% trans "Just now" %}"
-        }
-    }
-};
-</script>
 {% include 'snippets/lib_tpl.html' %}
 {% endblock %}

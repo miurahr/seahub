@@ -72,11 +72,12 @@
         starFile: function () {
             var _this = this;
             var col = this.collection;
-            var path = col.path == '/' ? '/' : col.path + '/';
+            var path = col.path;
+            path += path == '/' ? '' : '/';
             var starred = this.model.get('starred');
-            var url = '/ajax/repo/' + col.repo_id + '/file/';
-            url += starred ? 'unstar/' : 'star/';
-            url += '?file=' + e(path + this.model.get('obj_name'));
+            var obj = { repo_id: col.repo_id };
+            obj.name = starred ? 'unstar_file' : 'star_file';
+            var url = app.utils.getUrl(obj) + '?file=' + e(path + this.model.get('obj_name'));
             $.ajax({
                 url: url,
                 dataType: 'json',
@@ -144,8 +145,8 @@
             cur_path += cur_path == '/' ? '' : '/';
             var repo_id = col.repo_id;
             var ajax_urls = {
-                'link': app.urls.get_shared_link + '?repo_id=' + e(repo_id) + '&p=' + e(cur_path + name),
-                'upload-link': app.urls.get_shared_upload_link + '?repo_id=' + e(repo_id) + '&p=' + e(cur_path + name)
+                'link': app.utils.getUrl({name: 'get_shared_link'}) + '?repo_id=' + e(repo_id) + '&p=' + e(cur_path + name),
+                'upload-link': app.utils.getUrl({name: 'get_shared_upload_link'}) + '?repo_id=' + e(repo_id) + '&p=' + e(cur_path + name)
             };
             var type = this.model.get('is_dir') ? 'd' : 'f';
             if (type == 'd') {
@@ -162,9 +163,9 @@
         delete: function () {
             var dirent_name = this.model.get('obj_name');
             var col = this.collection;
-            var url_main = '/ajax/repo/' + col.repo_id;
-            url_main += this.model.get('is_dir') ? '/dir' : '/file';
-            url_main += '/delete/';
+            var obj = {repo_id: col.repo_id};
+            obj.name = this.model.get('is_dir') ? 'del_dir' : 'del_file';
+            var url_main = app.utils.getUrl(obj);
             var el = this.$el;
             $.ajax({
                 url: url_main + '?parent_dir=' + e(col.path) + '&name=' + e(dirent_name),
@@ -174,7 +175,6 @@
                     no_file_op_popup = true;// make other items can work normally when hover
                     //var msg = "{% trans "Successfully deleted %(name)s" %}"; // todo
                     var msg = "Successfully deleted %(name)s";
-                    //var msg = app.pages.lib.config.msgs.successDel;
                     msg = msg.replace('%(name)s', dirent_name);
                     feedback(msg, 'success');
                 },
@@ -212,9 +212,9 @@
                     return false;
                 }
                 var post_data = {'oldname': dirent_name, 'newname':new_name};
-                var post_url = '/ajax/repo/' + col.repo_id;
-                post_url += is_dir ? '/dir' : '/file';
-                post_url += '/rename/?parent_dir=' + e(col.path);
+                var obj = { repo_id: col.repo_id };
+                obj.name = is_dir ? 'rename_dir' : 'rename_file';
+                var post_url = app.utils.getUrl(obj) + '?parent_dir=' + e(col.path);
                 var after_op_success = function (data) {
                     new_name = data['newname'];
                     var now = new Date().getTime()/1000;
@@ -318,7 +318,7 @@
             var hd = $('#update-file-dialog .hd');
             hd.html(hd.html().replace('%(file_name)s', '<span class="op-target">' + file_name + '</span>'));
             $.ajax({
-                url: '/ajax/repo/' + col.repo_id + '/file_op_url/?op_type=update',
+                url: app.utils.getUrl({name:'get_file_op_url', repo_id: col.repo_id}) + '?op_type=update',
                 cache: false,
                 dataType: 'json',
                 success: function(data) {
@@ -466,7 +466,7 @@
                         path = path + '/';
                     }
                     $.ajax({
-                        url: '/thumbnail/' + dirents.repo_id + '/create/' + '?path=' + e(path + file_name),
+                        url: app.utils.getUrl({name:'thumbnail_create', repo_id: dirents.repo_id}) + '?path=' + e(path + file_name),
                         cache: false,
                         dataType: 'json',
                         success: function(data) {
@@ -546,7 +546,7 @@
                     return false;
                 }
                 var post_data = {'dirent_name': dirent_name};
-                var post_url = '/ajax/repo/' + dirents.repo_id + '/dir/new/?parent_dir=' + e(dirents.path);
+                var post_url = app.utils.getUrl({name:'new_dir', repo_id: dirents.repo_id}) + '?parent_dir=' + e(dirents.path);
                 var after_op_success = function(data) {
                     $.modal.close();
                     var now = new Date().getTime()/1000;
@@ -596,7 +596,7 @@
                     return false;
                 }
                 var post_data = {'dirent_name': dirent_name};
-                var post_url = '/ajax/repo/' + col.repo_id + '/file/new/?parent_dir=' + e(path);
+                var post_url = app.utils.getUrl({name:'new_file', repo_id: col.repo_id}) + '?parent_dir=' + e(path);
                 var after_op_success = function(data) {
                     $.modal.close(); // restore form initial state
                     if (path != '/') {
@@ -711,7 +711,7 @@
                     selected_names.push(this.get('obj_name'));
                 });
                 $.ajax({
-                    url: app.pages.lib.config.urls.delete_dirents + '?parent_dir=' + e(dirents.path),
+                    url: app.utils.getUrl({name:'del_dirents', repo_id:dirents.repo_id}) + '?parent_dir=' + e(dirents.path),
                     type: 'POST',
                     dataType: 'json',
                     beforeSend: prepareCSRFToken,
@@ -810,12 +810,13 @@
                     dst_path = $('[name="dst_path"]', form).val(),
                     url_main;
                 var cur_path = dirents.path;
+                var url_obj = {repo_id:dirents.repo_id};
 
                 if (!$.trim(dst_repo) || !$.trim(dst_path)) {
                     $('.error', form).removeClass('hide');
                     return false;
                 }
-                if (dst_repo == app.pages.lib.config.repo_id && dst_path == cur_path) {
+                if (dst_repo == dirents.repo_id && dst_path == cur_path) {
                     //$('.error', form).html("{% trans "Invalid destination path" %}").removeClass('hide');
                     $('.error', form).html("Invalid destination path").removeClass('hide');
                     return false;
@@ -825,11 +826,11 @@
                 //form.append('<p style="color:red;">' + "{% trans "Processing..." %}" + '</p>');
                 form.append('<p style="color:red;">' + "Processing..." + '</p>');
 
-                if (dst_repo == app.pages.lib.config.repo_id) {
+                if (dst_repo == dirents.repo_id) {
                     // when mv/cp in current lib, files/dirs can be handled in batch, and no need to show progress
-                    url_main = op == 'mv' ? app.pages.lib.config.urls.mv_dirents : app.pages.lib.config.urls.cp_dirents;
+                    url_obj.name = op == 'mv' ? 'mv_dirents' : 'cp_dirents';
                     $.ajax({
-                        url: url_main + '?parent_dir=' + e(cur_path),
+                        url: app.utils.getUrl(url_obj) + '?parent_dir=' + e(cur_path),
                         type: 'POST',
                         dataType: 'json',
                         beforeSend: prepareCSRFToken,
@@ -937,11 +938,11 @@
                             post_data;
 
                         if (op == 'mv') {
-                            post_url = obj_type == 'dir' ? app.pages.lib.config.urls.mv_dir : app.pages.lib.config.urls.mv_file;
+                            url_obj.name = obj_type == 'dir' ? 'mv_dir' : 'mv_file';
                         } else {
-                            post_url = obj_type == 'dir' ? app.pages.lib.config.urls.cp_dir : app.pages.lib.config.urls.cp_file;
+                            url_obj.name = obj_type == 'dir' ? 'cp_dir' : 'cp_file';
                         }
-                        post_url += '?path=' + e(cur_path) + '&obj_name=' + e(obj_name);
+                        post_url = app.utils.getUrl(url_obj) + '?path=' + e(cur_path) + '&obj_name=' + e(obj_name);
                         post_data = {
                             'dst_repo': dst_repo,
                             'dst_path': dst_path
@@ -955,7 +956,7 @@
                                 var task_id = data['task_id'];
                                 cancel_btn.data('task_id', task_id);
                                 $.ajax({
-                                    url: app.pages.lib.config.urls.get_cp_progress + '?task_id=' + e(task_id),
+                                    url: app.utils.getUrl({name:'get_cp_progress'}) + '?task_id=' + e(task_id),
                                     dataType: 'json',
                                     success: function(data) {
                                         var bar = $('.ui-progressbar-value', $('#mv-progress'));
@@ -1030,7 +1031,7 @@
                         disable(cancel_btn);
                         var task_id = $(this).data('task_id');
                         $.ajax({
-                            url: app.pages.lib.config.urls.cancel_cp + '?task_id=' + e(task_id),
+                            url: app.utils.getUrl({name:'cancel_cp'}) + '?task_id=' + e(task_id),
                             dataType: 'json',
                             success: function(data) {
                                 //other_info.html("{% trans "Canceled." %}").removeClass('hide');

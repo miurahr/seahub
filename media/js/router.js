@@ -12,7 +12,8 @@
         routes: {
             'lib/:repo_id/dir/(*path)': 'get_dirents',
             'home/my/lib/:repo_id/dir/(*path)': 'myhome_lib',
-            'home/my/': 'back_home'
+            'home/my/': 'back_home',
+            '': 'back_home'
         },
         get_dirents: function(repo_id, path) {
             if (!path) {

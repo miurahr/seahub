@@ -6,10 +6,7 @@
     app.collections.LibDirents = Backbone.Collection.extend({
         model: app.models.LibDirent,
         url: function () {
-            var default_url = app.urls.get_lib_dirents;
-            var url_ele = default_url.split('/');
-            url_ele[3] = this.repo_id; // replace the repo id
-            return url_ele.join('/');
+            return app.utils.getUrl({name:'get_lib_dirents', repo_id: this.repo_id});
         },
         parse: function (data) {
             this.repo_name = data.repo_name;

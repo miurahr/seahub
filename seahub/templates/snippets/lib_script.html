@@ -76,7 +76,7 @@ function render_jstree_for_cur_path() {
     }
     container.data('site_root', '{{SITE_ROOT}}');
     $.ajax({
-        url: '/ajax/repo/' + repo_id + '/dirents/?path=' + e(cur_path) + '&dir_only=true&all_dir=true',
+        url: app.utils.getUrl({name: 'get_dirents', repo_id: repo_id}) + '?path=' + e(cur_path) + '&dir_only=true&all_dir=true',
         cache: false,
         dataType: 'json',
         success: function(data) {
@@ -173,10 +173,13 @@ $('#mv-form').submit(function() {
             $('.error', form).html("{% trans "Invalid destination path" %}").removeClass('hide');
             return false;
         }
-        post_url = '/ajax/repo/' + repo_id;
-        post_url += obj_type == 'dir' ? '/dir' : '/file';
-        post_url += op == 'mv' ? '/mv' : '/cp';
-        post_url += '/?path=' + e(path) + '&obj_name=' + e(obj_name);
+        var url_obj = {repo_id: repo_id};
+        if (obj_type == 'dir') {
+            url_obj.name = op == 'mv' ? 'mv_dir' : 'cp_dir';
+        } else {
+            url_obj.name = op == 'mv' ? 'mv_file' : 'cp_file';
+        }
+        post_url = app.utils.getUrl(url_obj) + '?path=' + e(path) + '&obj_name=' + e(obj_name);
         post_data = {
             'dst_repo': dst_repo,
             'dst_path': dst_path
@@ -441,7 +444,7 @@ $(function() {
             // get url(token) for every file
             if (!file.error) {
                 $.ajax({
-                    url: '/ajax/repo/' + dirents.repo_id + '/file_op_url/?op_type=upload',
+                    url: app.utils.getUrl({name:'get_file_op_url', repo_id:dirents.repo_id}) + '?op_type=upload',
                     cache: false,
                     dataType: 'json',
                     success: function(ret) {

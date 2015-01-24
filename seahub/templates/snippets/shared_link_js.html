@@ -191,7 +191,8 @@ function showSharePopup(op, name, aj_urls, type, cur_path) {
             }
             // check if a sub-lib exists, if not, create one
             $.ajax({
-                url: '{{SITE_ROOT}}ajax/repo/' + repo_id + '/dir/sub_repo/?p=' + e(form.data('dir-path')), dataType: 'json',
+                url: '{{SITE_ROOT}}ajax/repo/' + repo_id + '/dir/sub_repo/?p=' + e(form.data('dir-path')),
+                dataType: 'json',
                 success: function(data) {
                     $('[name="repo_id"]', form).val(data['sub_repo_id']);
                     form.submit();

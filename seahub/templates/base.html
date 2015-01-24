@@ -142,16 +142,36 @@ var app = {
         siteRoot: '{{ SITE_ROOT }}'
     },
     templates: {},
-    pages: {},
     page: {},
-    utils: {},
-    urls: {
-        {% with repo_id='b1f848b7-96a2-418d-8182-91ab4c4835eb' %}
-        get_lib_dirents: '{% url 'get_lib_dirents' repo_id %}',
-        {% endwith %}
-        get_shared_link: '{% url 'get_shared_link' %}',
-        get_shared_upload_link: '{% url 'get_shared_upload_link' %}'
-
+    utils: {
+        getUrl: function(obj) {
+            var siteRoot = app.config.siteRoot;
+            switch (obj.name) {
+                case 'get_lib_dirents': return siteRoot + 'ajax/lib/' + obj.repo_id + '/dirents/';
+                case 'star_file': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file/star/';
+                case 'unstar_file': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file/unstar/';
+                case 'del_dir': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dir/delete/';
+                case 'del_file': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file/delete/';
+                case 'rename_dir': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dir/rename/';
+                case 'rename_file': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file/rename/';
+                case 'mv_dir': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dir/mv/';
+                case 'cp_dir': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dir/cp/';
+                case 'mv_file': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file/mv/';
+                case 'cp_file': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file/cp/';
+                case 'new_dir': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dir/new/';
+                case 'new_file': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file/new/';
+                case 'del_dirents': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dirents/delete/';
+                case 'mv_dirents': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dirents/move/';
+                case 'cp_dirents': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dirents/copy/';
+                case 'get_file_op_url': return siteRoot + 'ajax/repo/' + obj.repo_id + '/file_op_url/';
+                case 'get_dirents': return siteRoot + 'ajax/repo/' + obj.repo_id + '/dirents/';
+                case 'thumbnail_create': return siteRoot + 'thumbnail/' + obj.repo_id + '/create/';
+                case 'get_cp_progress': return '{% url "get_cp_progress" %}';
+                case 'cancel_cp': return '{% url "cancel_cp" %}';
+                case 'get_shared_link': return '{% url 'get_shared_link' %}';
+                case 'get_shared_upload_link': return '{% url 'get_shared_upload_link' %}';
+            }
+        }
     }
 };
 </script>
