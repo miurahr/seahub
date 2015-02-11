@@ -68,17 +68,18 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '%s/assets/' % MEDIA_ROOT
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = ''
+STATIC_URL = '/media/assets/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '%s/static' % PROJECT_ROOT,
 )
 
 # List of finder classes that know how to find static files in
@@ -88,6 +89,12 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+# STATICFILES_STORAGE = 'require.storage.OptimizedStaticFilesStorage'
+# REQUIRE_BASE_URL = "scripts"
+# REQUIRE_BUILD_PROFILE = "build.js"
+# REQUIRE_JS = "lib/require.js"
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'n*v0=jz-1rz@(4gx^tf%6^e7c&um@2)g-l=3_)t@19a69n1nv6'
@@ -174,9 +181,11 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
 
     'registration',
     'captcha',
+    # 'require',
 
     'seahub.api2',
     'seahub.avatar',
