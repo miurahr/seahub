@@ -1721,7 +1721,10 @@ def repo_history_changes(request, repo_id):
 
     # perm check
     if check_repo_access_permission(repo.id, request.user) is None:
-        return HttpResponse(json.dumps(changes), content_type=content_type)
+        if request.user.is_staff is True:
+            pass # Allow system staff to check repo changes
+        else:
+            return HttpResponse(json.dumps(changes), content_type=content_type)
 
     username = request.user.username
     try: 

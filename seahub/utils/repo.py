@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from django.utils.translation import ugettext as _
 
 import seaserv
@@ -6,6 +7,8 @@ from seaserv import seafile_api
 
 from seahub.utils import EMPTY_SHA1, is_valid_username
 from seahub.views import check_repo_access_permission
+
+logger = logging.getLogger(__name__)
 
 def list_dir_by_path(cmmt, path):
     if cmmt.root_id == EMPTY_SHA1:
@@ -64,3 +67,4 @@ def check_group_folder_perm_args(request_user, repo_id, path, group_id, perm = N
         return {'error': _('Invalid group'), 'status': 400}
 
     return {'success': True}
+
