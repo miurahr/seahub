@@ -42,6 +42,8 @@
         {{ form.note }}             {{ form.note.errors }}
         {% endif %}
 
+        {% include "registration/terms_privacy_fields.html" %}
+
         <p class="error hide"></p>
         <input type="submit" value="{% trans "Sign Up" %}" class="submit" />
     </form>
@@ -51,6 +53,8 @@
 {% endblock %}
 
 {% block extra_script %}
+{% include "registration/terms_privacy_fields_js.html" %}
+
 <script type="text/javascript" src="{{MEDIA_URL}}js/bootstrap.min.js"></script>
 <script type="text/javascript">
 {% if strong_pwd_required %}

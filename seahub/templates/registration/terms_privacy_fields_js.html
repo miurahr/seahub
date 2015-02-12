@@ -1,0 +1,16 @@
+<script type="text/javascript">
+ $(function() {
+    disable($('input[type="submit"]', 'form'));
+    var toggleSubmit = function() {
+        var checkNum = $('input[type="checkbox"]:checked', 'form').length;
+        if (checkNum == 2) {
+            enable($('input[type="submit"]', 'form'));
+        } else {
+            disable($('input[type="submit"]', 'form'));
+        }
+    };
+
+    $('input[type="checkbox"]', 'form').click(toggleSubmit);
+});
+
+</script>

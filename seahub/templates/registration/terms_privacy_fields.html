@@ -1,0 +1,21 @@
+<label class="checkbox-label">
+    <span class="checkbox"><input type="checkbox" class="checkbox-orig" /></span>
+    <span class="checkbox-option">
+        {% if LANGUAGE_CODE != 'de' %}
+        I have read and accepted the terms and conditions. (<a href="https://order.mein-seafile.de/agb.php" target="_blank">Terms and Conditions</a>)
+        {% else %}
+        Ich habe die AGB gelesen und bin damit einverstanden (<a href="https://order.mein-seafile.de/agb.php" target="_blank">AGB</a>).
+        {% endif %}
+    </span>
+</label>
+
+<label class="checkbox-label">
+    <span class="checkbox"><input type="checkbox" class="checkbox-orig" /></span>
+    <span class="checkbox-option">
+        {% if LANGUAGE_CODE != 'de' %}
+        I have read and accepted the data privacy statement. (<a href="https://order.mein-seafile.de/privacy.php" target="_blank">Data Privacy Statement)</a>
+        {% else %}
+        Ich habe die Datenschutzerklärung gelesen und bin damit einverstanden (<a href="https://order.mein-seafile.de/privacy.php" target="_blank">Datenschutzerklärung</a>).
+        {% endif %}
+    </span>
+</label>
