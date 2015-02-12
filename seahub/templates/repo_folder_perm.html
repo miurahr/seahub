@@ -71,7 +71,7 @@
                 </tr>
                 {% if user_folder_perms %}
                 {% for perm in user_folder_perms %}
-                <tr class="perm-item" data-user="{{ perm.user }}" data-path="{{ perm.path }}">
+                <tr class="perm-item" data-user="{{ perm.user }}" data-path="{{ perm.path }}" data-perm="{{ perm.permission }}">
                     <td><a href="{% url 'user_profile' perm.user %}">{{ perm.user }}</a></td>
                     <td><span><a href="{{ perm.folder_link }}">{{ perm.folder_name }}</a></span></td>
                     <td>
@@ -126,7 +126,7 @@
                 </tr>
                 {% if group_folder_perms %}
                 {% for perm in group_folder_perms %}
-                    <tr class="perm-item" data-group_id="{{ perm.group_id }}" data-path="{{ perm.path }}">
+                    <tr class="perm-item" data-group_id="{{ perm.group_id }}" data-path="{{ perm.path }}" data-perm="{{ perm.permission }}">
                         <td><a href="{% url 'group_info' perm.group_id %}">{{ perm.group_name }}</a></td>
                         <td>
                             <span><a href="{{ perm.folder_link }}">{{ perm.folder_name }}</a></span>
@@ -250,15 +250,16 @@ $('.perm-toggle-select').on('change', function() {
 });
 $('.perm-delete-btn').on('click', function() {
     var perm_item = $(this).parents('.perm-item'),
+        perm = perm_item.attr('data-perm'),
         path = perm_item.attr('data-path');
 
     if (is_user_tab == true) {
         var user = perm_item.attr('data-user'),
-            data = { 'user': user, 'path': path },
+            data = { 'user': user, 'path': path, 'perm': perm },
             url = '{% url 'remove_user_folder_permission' repo.id %}';
     } else {
         var group_id = perm_item.attr('data-group_id'),
-            data = { 'group_id': group_id, 'path': path },
+            data = { 'group_id': group_id, 'path': path, 'perm': perm},
             url = '{% url 'remove_group_folder_permission' repo.id %}';
     }
 

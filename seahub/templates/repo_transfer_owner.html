@@ -24,7 +24,9 @@
         <li class="tab"><a href="{% url 'repo_shared_link' repo.id %}">{% trans "Shared Links" %}</a></li>
         {% endif %}
         <li class="tab"><a href="{% url 'repo_share_manage' repo.id %}">{% trans "Sharing Management" %}</a></li>
+        {% if ENABLE_FOLDER_PERM %}
         <li class="tab"><a href="{% url 'repo_folder_perm' repo.id %}">{% trans "SubFolder Permission" %}</a></li>
+        {% endif %}
     </ul>
 </div>
 {% endblock %}
