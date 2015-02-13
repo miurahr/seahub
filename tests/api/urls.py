@@ -29,5 +29,7 @@ F_URL = apiurl('/api2/f/')
 S_F_URL = apiurl('/api2/s/f/')
 
 LIST_GROUP_AND_CONTACTS_URL = apiurl('/api2/groupandcontacts/')
+DOWNLOAD_REPO_URL = apiurl('api2/repos/%s/download-info/')
+LOGOUT_DEVICE_URL = apiurl('api2/logout-device/')
 
 SERVER_INFO_URL = apiurl('/api2/server-info/')
