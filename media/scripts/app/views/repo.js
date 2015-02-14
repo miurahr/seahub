@@ -3,8 +3,9 @@ define([
     'underscore',
     'backbone',
     'common',
+    'app/views/share-popup',
     'text!' + app.config._tmplRoot + 'repo.html'
-], function($, _, Backbone, Common, reposTemplate) {
+], function($, _, Backbone, Common, SharePopupView, reposTemplate) {
     'use strict';
 
     var RepoView = Backbone.View.extend({
@@ -94,7 +95,17 @@ define([
         },
 
         share: function() {
-            alert("TODO");
+            var options = {
+                    'is_repo_owner': true,
+                    'is_virtual': this.model.get('virtual'),
+                    'user_perm': this.model.get('permission'),
+                    'repo_id': this.model.get('id'),
+                    'is_dir': true,
+                    'dirent_path': '/',
+                    'obj_name': this.model.get('name')
+                };
+            this.sharePopupView = new SharePopupView();
+            this.sharePopupView.showPopup(options);
         }
 
     });
